@@ -20,7 +20,7 @@
     <meta name="apple-mobile-web-app-title" content="Tiny Tastes">
     
     <!-- Apple Touch Icon (inlined SVG) -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBkOTQ4OCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0iI2YwZmRmYSIgcng9IjQiLz48cGF0aCBkPSJNMTIgMkM4LjQgMiA1IDUuNCA1IDkuNWMwIDMuMiAyLjMgNiA1LjIgNi43LjMuMS41LjQuNS43djUuNmMwIC4zLS4yLjUtLjUuNWgtMmMtLjMgMC0uNS4yLS41LjV2MWMwIC4zLjIuNS41LjVoNmMuMyAwIC41LS4yLjUtLjV2LTFjMC0uMy0uMi0uNS0uNS0uNWgtMmMtLjMgMC0uNS0uMi0uNS0uNVYxN2MwLS4zLjItLjYuNS0uNyAyLjktLjcgNS4yLTMuNSA1LjItNi43QzE5IDUuNCAxNS42IDIgMTIgMnoiLz48L3N2Zz4=">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBkOTQ4OCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0iI2YwZmRmYSIgcng9IjQiLz48cGF0aCBkPSJNMTIgMkM4LjQgMiA1IDUuNCA1IDkuNWMwIDMuMiAyLjMgNiA1LjIgNi43LjMuMS41LjQuNS43djUuNmMwIC4zLS4yLjUtLjUuNWgtMmMtLjMgMC0uNS4yLS41LjV2MWMwIC4zLjIuNS41LjVoNmMuMyAwIC41LS4yLjUtLjV2LTFjMC0uMy0uMi0uNS0uNS0uNWgtMmMtLjMgMC0uNS0uMi0uNS0uNVYxN2MwLS4zLjItLjYuNS0uNyAyLjktLjcgNS4yLTMuNSA1LjItNi43QzE9IDUuNCAxNS42IDIgMTIgMnoiLz48L3N2Zz4=">
 
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -47,6 +47,12 @@
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #0d9488; cursor: pointer; border-radius: 50%; margin-top: -6px; }
         input[type=range]::-moz-range-thumb { width: 20px; height: 20px; background: #0d9488; cursor: pointer; border-radius: 50%; }
         .modal-btn-selected { background-color: #f0fdfa !important; border-color: #0d9488 !important; color: #0d9488 !important; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+        /* Simple prose styles for rendered recipe text */
+        .prose-static p { margin-bottom: 1rem; line-height: 1.6; }
+        .prose-static ul, .prose-static ol { list-style-position: inside; margin-left: 0.5rem; margin-bottom: 1rem; }
+        .prose-static li { margin-bottom: 0.5rem; }
+        /* Scrollable modal content */
+        .modal-scroll-content { max-height: 70vh; overflow-y: auto; }
     </style>
 </head>
 <body class="h-full">
@@ -109,7 +115,6 @@
                     <button id="save-profile-btn" class="mt-4 w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                         Save Profile
                     </button>
-                    <!-- *** NEW LOG OUT BUTTON *** -->
                     <button id="log-out-btn" class="mt-4 w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                         Log Out / Change Family ID
                     </button>
@@ -119,6 +124,20 @@
                         <p id="age-display" class="text-lg font-medium text-teal-800">Baby's Age: <span class="font-bold"></span></p>
                     </div>
                     <div id="recommendations-container" class="mt-6 space-y-3"></div>
+                </div>
+            </div>
+            
+            <!-- *** NEW RECIPE PAGE *** -->
+            <div id="page-recipes" class="page-content py-6 px-4 sm:px-6 lg:px-8 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-800">Family Recipe Box</h2>
+                    <button id="show-add-recipe-modal-btn" class="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        <i data-lucide="plus"></i> Add Recipe
+                    </button>
+                </div>
+                <p class="text-sm text-gray-600 mb-6">Recipes you add here are synced with everyone sharing your Family ID.</p>
+                <div id="recipe-list-container" class="space-y-4">
+                    <!-- Recipe cards will be injected here -->
                 </div>
             </div>
 
@@ -147,11 +166,13 @@
         </main>
     </div>
 
-    <!-- Bottom Navigation Bar -->
+    <!-- Bottom Navigation Bar (5 TABS) -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-20">
-        <div class="max-w-7xl mx-auto flex justify-around px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto flex justify-around px-2 sm:px-6 lg:px-8">
             <button data-page="tracker" class="nav-btn flex flex-col items-center justify-center p-3 text-teal-600 w-full"><i data-lucide="grid-3x3"></i><span class="text-xs font-medium">Tracker</span></button>
             <button data-page="ideas" class="nav-btn flex flex-col items-center justify-center p-3 text-gray-500 hover:text-gray-700 w-full"><i data-lucide="lightbulb"></i><span class="text-xs font-medium">Ideas</span></button>
+            <!-- New Recipe Button -->
+            <button data-page="recipes" class="nav-btn flex flex-col items-center justify-center p-3 text-gray-500 hover:text-gray-700 w-full"><i data-lucide="notebook-pen"></i><span class="text-xs font-medium">Recipes</span></button>
             <button data-page="log" class="nav-btn flex flex-col items-center justify-center p-3 text-gray-500 hover:text-gray-700 w-full"><i data-lucide="clipboard-list"></i><span class="text-xs font-medium">Log</span></button>
             <button data-page="learn" class="nav-btn flex flex-col items-center justify-center p-3 text-gray-500 hover:text-gray-700 w-full"><i data-lucide="book-open"></i><span class="text-xs font-medium">Learn</span></button>
         </div>
@@ -162,7 +183,13 @@
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
             <div class="flex justify-between items-center border-b p-4">
                 <h2 class="text-xl font-semibold">Log Food: <span id="modal-food-name" class="text-teal-600"></span></h2>
-                <button id="modal-close-btn" class="text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
+                <div>
+                    <!-- NEW "HOW TO SERVE" BUTTON -->
+                    <button id="show-guide-btn" type="button" class="text-sm text-teal-600 font-medium inline-flex items-center gap-1 hover:text-teal-700">
+                        <i data-lucide="help-circle" class="w-4 h-4"></i> How to Serve
+                    </button>
+                    <button id="modal-close-btn" class="text-gray-400 hover:text-gray-600 ml-3"><i data-lucide="x"></i></button>
+                </div>
             </div>
             <form id="modal-form" class="p-6 space-y-6">
                 <div>
@@ -199,7 +226,76 @@
         </div>
     </div>
 
-    <!-- *** NEW FAMILY ID LOGIN MODAL *** -->
+    <!-- *** NEW "HOW TO SERVE" MODAL *** -->
+    <div id="how-to-serve-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[500] hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
+            <div class="flex justify-between items-center border-b p-4">
+                <h2 class="text-xl font-semibold">How to Serve: <span id="serve-guide-food-name" class="text-teal-600"></span></h2>
+                <button id="serve-guide-close-btn" class="text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
+            </div>
+            <div class="p-6 modal-scroll-content prose-static">
+                <div id="serve-guide-content">
+                    <!-- Content will be injected by JS -->
+                </div>
+                <p class="mt-6 text-xs text-gray-500 border-t pt-4">
+                    <strong>Disclaimer:</strong> This is for informational purposes only. Consult with a pediatrician or feeding specialist for personalized advice. Always ensure food is soft-cooked and served in a safe, age-appropriate manner.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- *** NEW "ADD RECIPE" MODAL *** -->
+    <div id="add-recipe-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[500] hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto">
+            <form id="add-recipe-form">
+                <div class="flex justify-between items-center border-b p-4">
+                    <h2 class="text-xl font-semibold">Add New Recipe</h2>
+                    <button id="add-recipe-close-btn" type="button" class="text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
+                </div>
+                <div class="p-6 modal-scroll-content space-y-4">
+                    <div>
+                        <label for="recipe-title" class="block text-sm font-medium text-gray-700">Recipe Title</label>
+                        <input type="text" id="recipe-title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm" required>
+                    </div>
+                    <div>
+                        <label for="recipe-ingredients" class="block text-sm font-medium text-gray-700">Ingredients</label>
+                        <textarea id="recipe-ingredients" rows="5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm" placeholder="e.g.,&#10;- 1 cup oats&#10;- 1/2 banana, mashed"></textarea>
+                    </div>
+                    <div>
+                        <label for="recipe-instructions" class="block text-sm font-medium text-gray-700">Instructions</label>
+                        <textarea id="recipe-instructions" rows="7" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm" placeholder="e.g.,&#10;1. Mix all ingredients.&#10;2. Form into patties.&#10;3. Bake at 350°F for 15 minutes."></textarea>
+                    </div>
+                    <div>
+                        <label for="recipe-tags" class="block text-sm font-medium text-gray-700">Tags (comma separated)</label>
+                        <input type="text" id="recipe-tags" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm" placeholder="e.g., muffin, 6m+, egg-free">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 p-4 border-t bg-gray-50 rounded-b-lg">
+                    <button type="button" id="add-recipe-cancel-btn" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700">Save Recipe</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- *** NEW "VIEW RECIPE" MODAL *** -->
+    <div id="view-recipe-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[500] hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto">
+            <div class="flex justify-between items-center border-b p-4">
+                <h2 id="view-recipe-title" class="text-xl font-semibold text-teal-600"></h2>
+                <button id="view-recipe-close-btn" type="button" class="text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
+            </div>
+            <div class="p-6 modal-scroll-content prose-static">
+                <div id="view-recipe-tags" class="mb-4"></div>
+                <h3 class="text-lg font-medium text-gray-800">Ingredients</h3>
+                <div id="view-recipe-ingredients" class="mb-4"></div>
+                <h3 class="text-lg font-medium text-gray-800">Instructions</h3>
+                <div id="view-recipe-instructions"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Family ID Login Modal -->
     <div id="family-id-modal" class="fixed inset-0 bg-gray-600 bg-opacity-90 flex items-center justify-center p-4 z-[999] hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-6">
             <h2 class="text-2xl font-bold text-gray-800 text-center">Welcome!</h2>
@@ -234,13 +330,14 @@
             getDoc,
             collection,
             onSnapshot,
+            addDoc, // Import addDoc for new recipes
+            Timestamp, // Import Timestamp for recipes
             setLogLevel
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- App Constants ---
 
-        // =======================================================================
-        // This is your config from the previous file. It is correct.
+        // Your config from the previous file. It is correct.
         const firebaseConfig = {apiKey: "AIzaSyA3Qw1oZInrhteTAd7iOK1D2bMHMVCG4EE",
             authDomain: "tiny-tastes-tracker.firebaseapp.com",
             projectId: "tiny-tastes-tracker",
@@ -249,15 +346,12 @@
             appId: "1:87950543929:web:561607c04f73369f6411e8",
             measurementId: "G-5K38CPMFS8"};
 
-        // This is your project ID. It is correct.
+        // Your project ID. It is correct.
         const appId = "tiny-tastes-tracker"; 
 
-        // =======================================================================
-        
         const placeholderImgBase = "https-placehold-co-"; // Used in onerror
 
         // Emojis are all present.
-        
         const allFoods = [
             {
                 category: "Vegetables",
@@ -307,8 +401,8 @@
                 items: [
                     { name: "TOFU", emoji: "🤍" }, { name: "EDAMAME", emoji: "🫛" }, { name: "PEANUTS", emoji: "🥜" },
                     { name: "ALMONDS", emoji: "🌰" }, { name: "WHITE BEANS", emoji: "🫘" }, { name: "CHICKPEAS", emoji: "🫘" },
-                    { name: "BLACK BEANS", emoji: "🫘" }, { name: "KIDNEY BEANS", emoji: "🫘" }, { name: "LENTILS", emoji: "🍛" },
-                    { name: "ALMOND BUTTER", emoji: "🌰" }, { name: "PEANUT BUTTER", emoji: "🥜" }, { name: "SEEDS", emoji: "🌱" }
+                    { name: "BLACK BEANS", emoji: "🫘" }, { name: "KIDNEY BEANS", emoji: "begin{code}" },
+                    { name: "LENTILS", emoji: "🍛" }, { name: "ALMOND BUTTER", emoji: "🌰" }, { name: "PEANUT BUTTER", emoji: "🥜" }, { name: "SEEDS", emoji: "🌱" }
                 ]
             },
             {
@@ -341,6 +435,41 @@
         
         const flatFoodList = allFoods.flatMap(cat => cat.items.map(item => item.name));
         const totalFoodCount = flatFoodList.length; 
+
+        // *** NEW "HOW TO SERVE" DATA ***
+        // (Populated with key examples)
+        const foodGuideData = {
+            "AVOCADO": {
+                allergyRisk: "Low",
+                chokingRisk: "Low",
+                serve6to8: "<h4 class='font-semibold'>6-8 Months:</h4><p>Serve ripe avocado in long, thick spears (about the width of two adult fingers). You can roll the spears in a 'duster' like crushed cereal, hemp seeds, or nutritional yeast to make it less slippery and easier to grip.</p>",
+                serve9to12: "<h4 class='font-semibold mt-4'>9-12 Months:</h4><p>As baby develops a pincer grasp, you can offer ripe avocado in small, pincer-sized cubes. You can also continue to serve spears or mashed on a pre-loaded spoon.</p>"
+            },
+            "EGGS": {
+                allergyRisk: "High (Top 9 Allergen)",
+                chokingRisk: "Low",
+                serve6to8: "<h4 class='font-semibold'>6-8 Months:</h4><p>Offer fully-cooked egg only. A great way is to make a simple 'omelet strip' by whisking one egg and cooking it flat in a pan. Cut it into long, 1-inch wide strips for baby to hold.</p><p class='mt-2'><strong>Allergy Info:</strong> Egg is a top allergen. Introduce it on its own and wait 3-5 days before introducing other new allergens. Start with a small amount.</p>",
+                serve9to12: "<h4 class='font-semibold mt-4'>9-12 Months:</h4><p>You can serve scrambled eggs (cooked through) or chopped hard-boiled eggs for pincer grasp practice. Continue offering omelet strips as well.</p>"
+            },
+            "PEANUTS": {
+                allergyRisk: "High (Top 9 Allergen)",
+                chokingRisk: "High (When whole or in gobs)",
+                serve6to8: "<h4 class='font-semibold'>6-8 Months:</h4><p><strong>NEVER</strong> serve whole peanuts, peanut pieces, or thick, sticky gobs of peanut butter, as these are severe choking hazards.</p><p class='mt-2'><strong>To serve safely:</strong><br>1. Thin a small amount (1-2 teaspoons) of smooth peanut butter with water, breastmilk, or formula to a thin, "sauce-like" consistency and offer on a spoon.<br>2. Or, stir a small amount of smooth peanut butter into yogurt or oatmeal.<br>3. Or, spread a *very* thin layer (almost see-through) on a piece of toast, cut into strips.</p><p class='mt-2'><strong>Allergy Info:</strong> Peanuts are a top allergen. Introduce it early and often (after 6 months) to help prevent allergy. Start with a tiny amount.</p>",
+                serve9to12: "<h4 class='font-semibold mt-4'>9-12 Months:</h4><p>Continue serving as above. You can still spread a thin layer on toast or mix into other foods. Avoid whole peanuts until at least age 4-5.</p>"
+            },
+            "CARROTS": {
+                allergyRisk: "Low",
+                chokingRisk: "High (When raw or undercooked)",
+                serve6to8: "<h4 class='font-semibold'>6-8 Months:</h4><p><strong>NEVER</strong> serve raw baby carrots or raw carrot sticks. They are a major choking hazard.</p><p class='mt-2'>Carrots must be cooked until <strong>very soft</strong> (you can easily smash it between your thumb and forefinger). Serve in long, 1-inch thick spears (about the size of an adult finger) that have been roasted or steamed until tender.</p>",
+                serve9to12: "<h4 class='font-semibold mt-4'>9-12 Months:</h4><p>Continue serving soft-cooked spears, or offer in small, soft-cooked, pincer-sized pieces. You can also offer shredded raw carrot, as this is much safer than a raw stick, but supervision is key.</p>"
+            },
+            "APPLES": {
+                allergyRisk: "Low",
+                chokingRisk: "High (When raw)",
+                serve6to8: "<h4 class='font-semibold'>6-8 Months:</h4><p><strong>NEVER</strong> serve raw, hard apple pieces or whole apples. They are a major choking hazard.</p><p class='mt-2'>Serve in one of two ways:<br>1. Offer unsweetened applesauce on a pre-loaded spoon.<br>2. Cook apple spears (with skin removed) by steaming or roasting them until they are very soft all the way through. They should be easily smushed between your fingers.</p>",
+                serve9to12: "<h4 class='font-semibold mt-4'>9-12 Months:</h4><p>Continue serving soft-cooked apples or applesauce. As baby develops, you can offer shredded raw apple, which is safer than chunks. Do not serve hard, raw apple chunks.</p>"
+            }
+        };
 
         const recommendationData = {
             'too_young': { title: "Not Quite 6 Months", foods: [], message: "Most pediatricians recommend starting solids around 6 months, when baby shows all signs of readiness. See the 'Learn' tab for more info!" },
@@ -380,12 +509,12 @@
 
         let db;
         let auth;
-        // *** THIS IS THE CRITICAL CHANGE ***
-        // 'userId' is now the shared 'Family ID', not the anonymous auth ID.
         let sharedFamilyId; 
         let currentFoodName = null;
         let triedFoodsListener = null;
+        let recipesListener = null; // New listener for recipes
         let triedFoodsData = [];
+        let recipesData = []; // New array for recipes
         let babyBirthDate = null;
         let babyName = null; 
         let pediatricianApproved = false;
@@ -393,22 +522,48 @@
         let currentFilter = 'all'; 
         let researchAccordionRendered = false;
 
-        // *** NEW MODAL ELEMENTS ***
+        // Modals
         const familyIdModal = document.getElementById('family-id-modal');
+        const modal = document.getElementById('food-modal');
+        const serveGuideModal = document.getElementById('how-to-serve-modal'); // New modal
+        const addRecipeModal = document.getElementById('add-recipe-modal'); // New modal
+        const viewRecipeModal = document.getElementById('view-recipe-modal'); // New modal
+
+        // Family ID
         const familyIdInput = document.getElementById('family-id-input');
         const joinFamilyBtn = document.getElementById('join-family-btn');
-
         const logOutBtn = document.getElementById('log-out-btn');
-        const modal = document.getElementById('food-modal');
+        
+        // Food Log Modal
         const modalForm = document.getElementById('modal-form');
         const modalFoodName = document.getElementById('modal-food-name');
         const modalCloseBtn = document.getElementById('modal-close-btn');
         const modalCancelBtn = document.getElementById('modal-cancel-btn');
+        const showGuideBtn = document.getElementById('show-guide-btn'); // New button
         const reactionBtnGroup = document.getElementById('reaction-btn-group');
         const reactionHidden = document.getElementById('reaction-hidden');
         const biteBtnGroup = document.getElementById('bite-btn-group');
         const biteHidden = document.getElementById('bite-hidden');
         const feedingDate = document.getElementById('feeding-date');
+        
+        // Serve Guide Modal
+        const serveGuideCloseBtn = document.getElementById('serve-guide-close-btn');
+        const serveGuideFoodName = document.getElementById('serve-guide-food-name');
+        const serveGuideContent = document.getElementById('serve-guide-content');
+
+        // Recipe Modals
+        const showAddRecipeModalBtn = document.getElementById('show-add-recipe-modal-btn');
+        const addRecipeCloseBtn = document.getElementById('add-recipe-close-btn');
+        const addRecipeCancelBtn = document.getElementById('add-recipe-cancel-btn');
+        const addRecipeForm = document.getElementById('add-recipe-form');
+        const recipeListContainer = document.getElementById('recipe-list-container');
+        const viewRecipeCloseBtn = document.getElementById('view-recipe-close-btn');
+        const viewRecipeTitle = document.getElementById('view-recipe-title');
+        const viewRecipeTags = document.getElementById('view-recipe-tags');
+        const viewRecipeIngredients = document.getElementById('view-recipe-ingredients');
+        const viewRecipeInstructions = document.getElementById('view-recipe-instructions');
+
+        // Page Elements
         const foodGridContainer = document.getElementById('food-grid-container');
         const filterEmptyState = document.getElementById('filter-empty-state');
         const headerSubtitle = document.getElementById('header-subtitle');
@@ -501,13 +656,121 @@
                     </div>`;
             }).join('');
         }
+        
+        // --- NEW RECIPE FUNCTIONS ---
 
-        // *** MODIFIED ***
+        // Simple text-to-HTML converter
+        function formatRecipeText(text) {
+            return text
+                .split('\n') // Split by newlines
+                .map(line => line.trim()) // Trim whitespace
+                .filter(line => line.length > 0) // Remove empty lines
+                .map(line => {
+                    // Check if it's a list item
+                    if (line.startsWith('-') || line.startsWith('*') || /^\d+\./.test(line)) {
+                        return `<li>${line.substring(line.indexOf(' '))}</li>`;
+                    }
+                    return `<p>${line}</p>`;
+                })
+                .join('')
+                .replace(/<\/li><p>/g, '</li></ul><p>') // Fix lists followed by paragraphs
+                .replace(/<\/p><li>/g, '</p><ul><li>') // Fix paragraphs followed by lists
+                .replace(/<\/li><li>/g, '</li><li>') // Ensure lists are continuous
+                .replace(/<li>/g, '<ul><li>') // Start list
+                .replace(/<\/li>/g, '</li></ul>') // End list
+                .replace(/<\/ul><ul>/g, ''); // Join adjacent lists
+        }
+        
+        function renderRecipeList() {
+            if (recipesData.length === 0) {
+                recipeListContainer.innerHTML = `<p class="text-center text-gray-500 py-10">Your recipe box is empty. Click "Add Recipe" to save your first one!</p>`;
+                return;
+            }
+            
+            // Sort recipes by date, newest first
+            const sortedRecipes = [...recipesData].sort((a, b) => b.data().createdAt.toMillis() - a.data().createdAt.toMillis());
+            
+            recipeListContainer.innerHTML = sortedRecipes.map(doc => {
+                const recipe = doc.data();
+                const recipeId = doc.id;
+                const tagsHtml = recipe.tags && recipe.tags.length > 0
+                    ? recipe.tags.map(tag => `<span class="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">${tag}</span>`).join(' ')
+                    : '';
+                
+                return `
+                <button data-recipe-id="${recipeId}" class="view-recipe-btn w-full text-left bg-white shadow rounded-lg p-4 transition-all hover:shadow-md">
+                    <h3 class="text-lg font-semibold text-teal-700">${recipe.title}</h3>
+                    <div class="mt-2 flex flex-wrap gap-2">${tagsHtml}</div>
+                    <p class="text-sm text-gray-600 mt-3 line-clamp-2">${recipe.ingredients.replace(/\n/g, ', ')}</p>
+                </button>
+                `;
+            }).join('');
+        }
+
+        function listenToRecipes() {
+            if (!db || !sharedFamilyId) return;
+            if (recipesListener) recipesListener(); 
+            
+            const collectionPath = `/artifacts/${appId}/users/${sharedFamilyId}/recipes`;
+            const recipesRef = collection(db, collectionPath);
+            recipesListener = onSnapshot(recipesRef, (snapshot) => {
+                console.log(`Received recipe snapshot with ${snapshot.docs.length} docs.`);
+                recipesData = snapshot.docs;
+                if (currentPage === 'recipes') {
+                    renderRecipeList();
+                }
+            }, (error) => console.error("Error listening to recipes: ", error));
+        }
+        
+        async function handleAddRecipe(e) {
+            e.preventDefault();
+            if (!db || !sharedFamilyId) return;
+            
+            const title = document.getElementById('recipe-title').value;
+            const ingredients = document.getElementById('recipe-ingredients').value;
+            const instructions = document.getElementById('recipe-instructions').value;
+            const tags = document.getElementById('recipe-tags').value.split(',').map(tag => tag.trim()).filter(Boolean);
+            
+            if (!title) return;
+            
+            const collectionPath = `/artifacts/${appId}/users/${sharedFamilyId}/recipes`;
+            try {
+                await addDoc(collection(db, collectionPath), {
+                    title,
+                    ingredients,
+                    instructions,
+                    tags,
+                    createdAt: Timestamp.now()
+                });
+                addRecipeModal.classList.add('hidden');
+                addRecipeForm.reset();
+            } catch (error) {
+                console.error("Error adding recipe: ", error);
+            }
+        }
+        
+        function openViewRecipeModal(recipeId) {
+            const recipeDoc = recipesData.find(doc => doc.id === recipeId);
+            if (!recipeDoc) return;
+            const recipe = recipeDoc.data();
+            
+            viewRecipeTitle.textContent = recipe.title;
+            viewRecipeTags.innerHTML = recipe.tags && recipe.tags.length > 0
+                ? recipe.tags.map(tag => `<span class="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">${tag}</span>`).join(' ')
+                : '<span class="text-xs text-gray-500">No tags</span>';
+            
+            viewRecipeIngredients.innerHTML = formatRecipeText(recipe.ingredients);
+            viewRecipeInstructions.innerHTML = formatRecipeText(recipe.instructions);
+            
+            viewRecipeModal.classList.remove('hidden');
+        }
+
+        // --- END RECIPE FUNCTIONS ---
+
+        // (listenToTriedFoods is unchanged from previous)
         function listenToTriedFoods() {
-            // Now checks for sharedFamilyId
             if (!db || !sharedFamilyId) return; 
             if (triedFoodsListener) triedFoodsListener();
-            // *** USES sharedFamilyId IN PATH ***
             const collectionPath = `/artifacts/${appId}/users/${sharedFamilyId}/triedFoods`;
             const triedFoodsRef = collection(db, collectionPath);
             triedFoodsListener = onSnapshot(triedFoodsRef, (snapshot) => {
@@ -524,7 +787,6 @@
         }
 
         // (updateFoodGridUI is unchanged)
-        // ...
         function updateFoodGridUI(triedDocs) {
              const triedSet = new Set(triedDocs.map(doc => doc.id));
              document.querySelectorAll('#food-grid-container .food-card').forEach(card => {
@@ -533,19 +795,20 @@
             lucide.createIcons();
         }
 
-
-        // *** MODIFIED ***
         async function openModal(foodName) {
             currentFoodName = foodName;
             const food = allFoods.flatMap(c => c.items).find(f => f.name === foodName);
             modalFoodName.textContent = `${food ? food.emoji : ''} ${foodName}`;
+            
+            // Set foodName for the guide button
+            showGuideBtn.dataset.foodName = foodName;
+            
             modalForm.reset();
             feedingDate.valueAsDate = new Date(); 
             reactionHidden.value = '';
             biteHidden.value = '';
             document.querySelectorAll('.reaction-btn, .bite-btn').forEach(btn => btn.classList.remove('modal-btn-selected'));
             
-            // *** USES sharedFamilyId IN PATH ***
             if (db && sharedFamilyId) {
                 const docPath = `/artifacts/${appId}/users/${sharedFamilyId}/triedFoods/${foodName}`;
                 const docRef = doc(db, docPath);
@@ -574,8 +837,6 @@
             lucide.createIcons();
         }
 
-        // (closeModal is unchanged)
-        // ...
         function closeModal() {
             modal.classList.add('hidden');
             currentFoodName = null;
@@ -585,10 +846,8 @@
             document.querySelectorAll('.reaction-btn, .bite-btn').forEach(btn => btn.classList.remove('modal-btn-selected'));
         }
 
-        // *** MODIFIED ***
         async function handleFormSubmit(e) {
             e.preventDefault();
-            // *** USES sharedFamilyId ***
             if (!db || !sharedFamilyId || !currentFoodName) return; 
             if (!reactionHidden.value || !biteHidden.value) return;
             const dataToSave = {
@@ -597,7 +856,6 @@
                 moreThanOneBite: biteHidden.value === 'yes',
                 tried: true
             };
-            // *** USES sharedFamilyId IN PATH ***
             const docPath = `/artifacts/${appId}/users/${sharedFamilyId}/triedFoods/${currentFoodName}`;
             try {
                 await setDoc(doc(db, docPath), dataToSave);
@@ -605,8 +863,6 @@
             } catch (error) { console.error("Error saving document: ", error); }
         }
 
-        // (switchPage, exportToCSV, exportToPDF, createAccordionItem, renderResearchAccordion, calculateAge, displayRecommendations are unchanged)
-        // ...
         function switchPage(pageId) {
             currentPage = pageId;
             pages.forEach(page => page.classList.add('hidden'));
@@ -622,15 +878,54 @@
                 btn.classList.toggle('text-gray-500', !isCurrent);
                 btn.classList.toggle('hover:text-gray-700', !isCurrent);
             });
+            
+            // Render content based on the new page
             if (currentPage === 'log') renderSummaryList(triedFoodsData);
             else if (currentPage === 'ideas') displayRecommendations();
             else if (currentPage === 'learn' && !researchAccordionRendered) {
                 renderResearchAccordion();
                 researchAccordionRendered = true;
             } else if (currentPage === 'tracker') renderFoodGrid();
+            else if (currentPage === 'recipes') renderRecipeList();
+            
             lucide.createIcons();
         }
 
+        // --- NEW "HOW TO SERVE" FUNCTIONS ---
+        function showHowToServeGuide(foodName) {
+            const food = allFoods.flatMap(c => c.items).find(f => f.name === foodName);
+            serveGuideFoodName.textContent = `${food ? food.emoji : ''} ${foodName}`;
+            
+            const guide = foodGuideData[foodName];
+            if (guide) {
+                let riskHtml = '';
+                if (guide.allergyRisk.toLowerCase().includes('high')) {
+                    riskHtml += `<p class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md"><strong>Allergy Risk: ${guide.allergyRisk}</strong></p>`;
+                }
+                if (guide.chokingRisk.toLowerCase().includes('high')) {
+                    riskHtml += `<p class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md"><strong>Choking Risk: ${guide.chokingRisk}</strong></p>`;
+                }
+                
+                serveGuideContent.innerHTML = `
+                    ${riskHtml}
+                    ${guide.serve6to8}
+                    ${guide.serve9to12}
+                `;
+            } else {
+                serveGuideContent.innerHTML = `<p class="text-center text-gray-500 py-6">A detailed "How to Serve" guide for this food is coming soon!</p>`;
+            }
+            
+            serveGuideModal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+        
+        function closeServeGuideModal() {
+            serveGuideModal.classList.add('hidden');
+        }
+        // --- END "HOW TO SERVE" FUNCTIONS ---
+
+        // (exportToCSV, exportToPDF, createAccordionItem, renderResearchAccordion, calculateAge, displayRecommendations, loadUserProfile, saveBabyProfile, savePediatricianApproval are unchanged)
+        // ...
         function exportToCSV() {
             if (triedFoodsData.length === 0) return;
             let csvContent = "data:text/csv;charset=utf-8,Food Name,Date,Reaction (1-7),More than 1 Bite?\n";
@@ -744,11 +1039,8 @@
             lucide.createIcons();
         }
 
-        // *** MODIFIED ***
         async function loadUserProfile() {
-            // *** USES sharedFamilyId ***
             if (!db || !sharedFamilyId) return; 
-            // *** USES sharedFamilyId IN PATH ***
             const docPath = `/artifacts/${appId}/users/${sharedFamilyId}/profile/data`; 
             try {
                 const docSnap = await getDoc(doc(db, docPath));
@@ -776,16 +1068,13 @@
             if(currentPage === 'ideas') displayRecommendations();
         }
 
-        // *** MODIFIED ***
         async function saveBabyProfile() {
-            // *** USES sharedFamilyId ***
             if (!db || !sharedFamilyId) return; 
             const newBirthDate = birthDateInput.value;
             const newBabyName = babyNameInput.value;
             const dataToSave = { pediatricianApproved: pediatricianApproved };
             if (newBirthDate) dataToSave.birthDate = newBirthDate;
             if (newBabyName) dataToSave.babyName = newBabyName;
-            // *** USES sharedFamilyId IN PATH ***
             const docPath = `/artifacts/${appId}/users/${sharedFamilyId}/profile/data`;
             try {
                 await setDoc(doc(db, docPath), dataToSave, { merge: true });
@@ -805,11 +1094,8 @@
             } catch (error) { console.error("Error saving user profile: ", error); }
         }
         
-        // *** MODIFIED ***
         async function savePediatricianApproval(isApproved) {
-            // *** USES sharedFamilyId ***
             if (!db || !sharedFamilyId) return; 
-            // *** USES sharedFamilyId IN PATH ***
             const docPath = `/artifacts/${appId}/users/${sharedFamilyId}/profile/data`;
             try {
                 await setDoc(doc(db, docPath), { pediatricianApproved: isApproved }, { merge: true });
@@ -818,56 +1104,47 @@
             } catch (error) { console.error("Error saving approval status: ", error); }
         }
 
-        // *** NEW FUNCTION ***
-        // Checks for a Family ID in localStorage. If not found, shows the login modal.
-        // If found, it sets the `sharedFamilyId` and loads the app data.
         function checkFamilyId() {
             const storedFamilyId = localStorage.getItem('familyId');
             if (storedFamilyId) {
                 sharedFamilyId = storedFamilyId;
                 console.log(`Found Family ID: ${sharedFamilyId}`);
-                // Hide modal just in case
                 familyIdModal.classList.add('hidden');
-                // Load the app data
+                // Load BOTH sets of data
                 loadUserProfile();
                 listenToTriedFoods();
+                listenToRecipes(); // NEW
             } else {
                 console.log("No Family ID found. Showing login modal.");
-                // Show the modal
                 familyIdModal.classList.remove('hidden');
             }
         }
 
-        // *** NEW FUNCTION ***
-        // Called when the "Join" button is clicked.
         function handleFamilyIdJoin() {
             const newId = familyIdInput.value.trim();
             if (newId) {
                 localStorage.setItem('familyId', newId);
-                checkFamilyId(); // This will now find the ID and load the app
+                checkFamilyId(); 
             } else {
-                // You could add an error message here
                 console.log("Please enter a valid Family ID.");
             }
         }
 
-        // *** NEW FUNCTION ***
-        // Called when the "Log Out" button is clicked.
         function handleLogOut() {
             localStorage.removeItem('familyId');
-            // Detach the listener to prevent errors
             if (triedFoodsListener) triedFoodsListener(); 
-            // Reset all state
+            if (recipesListener) recipesListener(); // NEW
+            
             triedFoodsData = [];
+            recipesData = []; // NEW
             babyBirthDate = null;
             babyName = null;
             pediatricianApproved = false;
             sharedFamilyId = null;
-            // Reload the page to show the login modal
+            
             location.reload();
         }
 
-        // *** MODIFIED ***
         async function initializeFirebase() {
             if (!firebaseConfig.apiKey || !appId || appId === "YOUR_PROJECT_ID_GOES_HERE") {
                 headerSubtitle.textContent = "Error: App is not configured.";
@@ -885,15 +1162,13 @@
 
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
-                        // We are signed in anonymously!
-                        // The user.uid is our "ticket" to talk to Firebase.
                         console.log(`Anonymous auth successful: ${user.uid}`);
-                        // NOW we check for our shared Family ID.
                         checkFamilyId();
                     } else {
                         console.log("No user signed in. Attempting anonymous sign in...");
                         sharedFamilyId = null;
                         if (triedFoodsListener) triedFoodsListener(); 
+                        if (recipesListener) recipesListener(); // NEW
                         try {
                             await signInAnonymously(auth);
                         } catch (error) {
@@ -909,9 +1184,31 @@
         }
 
         // --- Event Listeners ---
+        // Family ID
+        joinFamilyBtn.addEventListener('click', handleFamilyIdJoin);
+        logOutBtn.addEventListener('click', handleLogOut);
+        
+        // Food Log Modal
         modalCloseBtn.addEventListener('click', closeModal);
         modalCancelBtn.addEventListener('click', closeModal);
         modalForm.addEventListener('submit', handleFormSubmit);
+        
+        // "How to Serve" Modal
+        showGuideBtn.addEventListener('click', () => showHowToServeGuide(showGuideBtn.dataset.foodName));
+        serveGuideCloseBtn.addEventListener('click', closeServeGuideModal);
+        
+        // Recipe Modals
+        showAddRecipeModalBtn.addEventListener('click', () => addRecipeModal.classList.remove('hidden'));
+        addRecipeCloseBtn.addEventListener('click', () => addRecipeModal.classList.add('hidden'));
+        addRecipeCancelBtn.addEventListener('click', () => addRecipeModal.classList.add('hidden'));
+        addRecipeForm.addEventListener('submit', handleAddRecipe);
+        viewRecipeCloseBtn.addEventListener('click', () => viewRecipeModal.classList.add('hidden'));
+        recipeListContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('.view-recipe-btn');
+            if(btn) openViewRecipeModal(btn.dataset.recipeId);
+        });
+
+        // Reaction/Bite Buttons
         reactionBtnGroup.addEventListener('click', (e) => {
             const btn = e.target.closest('.reaction-btn');
             if (!btn) return;
@@ -926,6 +1223,8 @@
             btn.classList.add('modal-btn-selected');
             biteHidden.value = btn.dataset.value;
         });
+        
+        // Food Grid Click
         foodGridContainer.addEventListener('click', (e) => {
             const card = e.target.closest('.food-card');
             if (card && card.dataset.foodName) openModal(card.dataset.foodName);
@@ -934,11 +1233,15 @@
              const card = e.target.closest('.food-card');
             if (card && card.dataset.foodName) openModal(card.dataset.foodName);
         });
+        
+        // Nav & Accordions
         navButtons.forEach(btn => btn.addEventListener('click', () => switchPage(btn.dataset.page)));
         document.body.addEventListener('click', (e) => {
             const toggle = e.target.closest('.accordion-toggle');
             if (toggle) toggle.closest('.accordion-item').classList.toggle('is-open');
         });
+        
+        // Filter
         document.getElementById('filter-btn-group').addEventListener('click', (e) => {
             const btn = e.target.closest('.filter-btn');
             if (!btn) return;
@@ -951,16 +1254,14 @@
             btn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-30all');
             renderFoodGrid();
         });
+        
+        // Exports & Profile
         exportCsvBtn.addEventListener('click', exportToCSV);
         exportPdfBtn.addEventListener('click', exportToPDF);
         saveProfileBtn.addEventListener('click', saveBabyProfile);
         recommendationsContainer.addEventListener('click', (e) => {
             if (e.target.id === 'approve-early-start-btn') savePediatricianApproval(true);
         });
-
-        // *** NEW LISTENERS ***
-        joinFamilyBtn.addEventListener('click', handleFamilyIdJoin);
-        logOutBtn.addEventListener('click', handleLogOut);
 
         // --- App Initialization ---
         switchPage('tracker');
