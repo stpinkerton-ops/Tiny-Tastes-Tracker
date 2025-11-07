@@ -28,7 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- PDF Export Libraries -->
+    <!-- PDF Export Libraries (NO LONGER USED, but kept in case) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.autotable.umd.js"></script>
     <!-- Lucide Icons -->
@@ -75,26 +75,46 @@
             border-bottom-color: #0d9488; /* teal-600 */
         }
         
-        /* Draggable item style */
+        /* Draggable item style (NO LONGER USED) */
         .recipe-card-draggable {
-            cursor: grab;
+            /* cursor: grab; */
             transition: opacity 0.2s;
-        }
-        .recipe-card-draggable.dragging {
-            opacity: 0.5;
-            cursor: grabbing;
         }
         
         /* Meal planner grid */
         .meal-slot {
-            min-height: 80px;
+            min-height: 60px; /* Reduced min-height */
             background-color: #f9fafb; /* gray-50 */
             transition: background-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        .meal-slot.drag-over {
-            background-color: #ccfbf1; /* teal-100 */
-            outline: 2px dashed #0d9488; /* teal-600 */
+        .meal-slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        
+        /* NEW: Add meal button style */
+        .add-meal-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 38px;
+            text-align: center;
+            color: #9ca3af; /* gray-400 */
+            border-radius: 0.375rem; /* rounded-md */
+            border: 2px dashed #d1d5db; /* border-gray-300 */
+            transition: all 0.2s;
+        }
+        .add-meal-btn:hover {
+            color: #0d9488; /* text-teal-600 */
+            border-color: #0d9488; /* border-teal-500 */
+            background-color: #f0fdfa; /* bg-teal-50 */
+        }
+        
         .planned-meal-item {
             cursor: pointer;
             transition: all 0.2s;
@@ -102,6 +122,16 @@
         .planned-meal-item:hover {
             transform: scale(1.03);
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        /* NEW: Style for deleted/missing recipe in planner */
+        .planned-meal-item.is-deleted {
+            background-color: #fee2e2; /* bg-red-100 */
+            border-color: #fecaca; /* border-red-200 */
+            cursor: default;
+        }
+        .planned-meal-item.is-deleted p {
+            color: #b91c1c; /* text-red-800 */
+            font-style: italic;
         }
         
         /* Loading spinner */
@@ -117,6 +147,43 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* NEW: Meal Type Buttons in Add Recipe Modal */
+        .meal-type-btn {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            font-size: 0.875rem; /* text-sm */
+            color: #374151; /* text-gray-700 */
+            transition: all 0.2s;
+        }
+        .meal-type-btn:hover {
+            background-color: #f9fafb; /* bg-gray-50 */
+        }
+        /* Uses same 'modal-btn-selected' class as food log modal */
+        
+        /* NEW: Select Recipe Modal Styles */
+        .recipe-select-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem; /* rounded-md */
+            transition: background-color 0.2s;
+        }
+        .recipe-select-item:hover {
+            background-color: #f0fdfa; /* bg-teal-50 */
+        }
+        .recipe-select-item h4 {
+            font-weight: 500;
+            color: #0d9488; /* text-teal-600 */
+        }
+        .recipe-select-item p {
+            font-size: 0.875rem; /* text-sm */
+            color: #4b5563; /* text-gray-600 */
+            line-clamp: 2;
+        }
+        
         /* --- END MEAL PLANNER STYLES --- */
     </style>
 </head>
@@ -226,7 +293,7 @@
 
                 <!-- Sub-page: My Recipes -->
                 <div id="subpage-my-recipes" class="recipe-sub-page">
-                    <p class="text-sm text-gray-600 mb-6">Drag a recipe from this list onto the Meal Planner.</p>
+                    <p class="text-sm text-gray-600 mb-6">View, edit, or delete your saved recipes. Recipes can be added to the Meal Planner.</p>
                     <div id="recipe-list-container" class="space-y-4">
                         <!-- Recipe cards will be injected here -->
                     </div>
@@ -272,8 +339,9 @@
                         <button id="export-csv-btn" class="inline-flex items-center gap-2 px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                             <i data-lucide="sheet"></i> CSV
                         </button>
-                        <button id="export-pdf-btn" class="inline-flex items-center gap-2 px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                            <i data-lucide="file-text"></i> PDF
+                        <!-- MODIFIED: PDF Button is now Email Button -->
+                        <button id="email-pediatrician-btn" class="inline-flex items-center gap-2 px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <i data-lucide="mail"></i> Email
                         </button>
                     </div>
                 </div>
@@ -388,6 +456,17 @@
                         <label for="recipe-title" class="block text-sm font-medium text-gray-700">Recipe Title</label>
                         <input type="text" id="recipe-title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm" required>
                     </div>
+                    <!-- NEW: Meal Type Buttons -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Meal Type (Optional)</label>
+                        <p class="text-xs text-gray-500 mb-2">Select all that apply. If none are selected, it will show for all meal types.</p>
+                        <div id="recipe-meal-type-group" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+                            <button type="button" data-value="breakfast" class="meal-type-btn">Breakfast</button>
+                            <button type="button" data-value="lunch" class="meal-type-btn">Lunch</button>
+                            <button type="button" data-value="dinner" class="meal-type-btn">Dinner</button>
+                            <button type="button" data-value="snack" class="meal-type-btn">Snack</button>
+                        </div>
+                    </div>
                     <div>
                         <label for="recipe-ingredients" class="block text-sm font-medium text-gray-700">Ingredients</label>
                         <textarea id="recipe-ingredients" rows="5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm" placeholder="e.g.,&#10;- 1 cup oats&#10;- 1/2 banana, mashed"></textarea>
@@ -397,7 +476,7 @@
                         <textarea id="recipe-instructions" rows="7" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm" placeholder="e.g.,&#10;1. Mix all ingredients.&#10;2. Form into patties.&#10;3. Bake at 350°F for 15 minutes."></textarea>
                     </div>
                     <div>
-                        <label for="recipe-tags" class="block text-sm font-medium text-gray-700">Tags (comma separated)</label>
+                        <label for="recipe-tags" class="block text-sm font-medium text-gray-700">Custom Tags (comma separated)</label>
                         <input type="text" id="recipe-tags" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm" placeholder="e.g., muffin, 6m+, egg-free">
                     </div>
                 </div>
@@ -411,7 +490,7 @@
     
     <!-- "View Recipe" Modal -->
     <div id="view-recipe-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[500] hidden">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto flex flex-col">
             <div class="flex justify-between items-center border-b p-4">
                 <h2 id="view-recipe-title" class="text-xl font-semibold text-teal-600"></h2>
                 <button id="view-recipe-close-btn" type="button" class="modal-close-btn text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
@@ -422,6 +501,10 @@
                 <div id="view-recipe-ingredients" class="mb-4"></div>
                 <h3 class="text-lg font-medium text-gray-800">Instructions</h3>
                 <div id="view-recipe-instructions"></div>
+            </div>
+            <!-- NEW: Footer with Delete Button -->
+            <div class="flex justify-end space-x-3 p-4 border-t bg-gray-50 rounded-b-lg">
+                <button type="button" id="delete-recipe-btn" class="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">Delete Recipe</button>
             </div>
         </div>
     </div>
@@ -450,7 +533,7 @@
                 <button id="view-planned-meal-close-btn" type="button" class="modal-close-btn text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
             </div>
             <div class="p-4 space-y-3">
-                <button id="view-recipe-details-btn" class="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700">View Recipe</button>
+                <button id="view-recipe-details-btn" class="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 disabled:opacity-50" disabled>View Recipe</button>
                 <button id="remove-planned-meal-btn" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-red-600 bg-white hover:bg-gray-50">Remove from Plan</button>
             </div>
         </div>
@@ -512,6 +595,19 @@
                 <button id="ai-suggest-submit-btn" class="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-violet-600 hover:bg-violet-700">
                     ✨ Generate Recipe
                 </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- NEW: Select Recipe Modal -->
+    <div id="select-recipe-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[500] hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
+            <div class="flex justify-between items-center border-b p-4">
+                <h2 class="text-xl font-semibold text-gray-800">Select a Recipe</h2>
+                <button id="select-recipe-close-btn" type="button" class="modal-close-btn text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
+            </div>
+            <div id="select-recipe-list" class="p-2 modal-scroll-content">
+                <!-- Recipe select buttons will be injected here -->
             </div>
         </div>
     </div>
@@ -766,7 +862,7 @@
             { 
                 title: "Original '100 Foods' Chart", 
                 icon: "image",
-                content: `<p>Here is the original chart that inspired this tracker. Use it as a quick visual reference!</p><img src="https://storage.googleapis.com/aletheia-us-west1-prod-onboarding/blw-100-foods-chart.jpeg" alt="100 Foods for Baby Chart by The Fortified Family" class="w-full h-auto rounded-md shadow-md mt-4" onerror="this.onerror=null; this.src='https://placehold.co/600x800/eeeeee/999999?text=Could+not+load+image';">`
+                content: `<p>Here is the original chart that inspired this tracker. Use it as a quick visual reference!</p><img src="https.storage.googleapis.com/aletheia-us-west1-prod-onboarding/blw-100-foods-chart.jpeg" alt="100 Foods for Baby Chart by The Fortified Family" class="w-full h-auto rounded-md shadow-md mt-4" onerror="this.onerror=null; this.src='https://placehold.co/600x800/eeeeee/999999?text=Could+not+load+image';">`
             },
             { 
                 title: "1. Key Signs of Readiness", 
@@ -809,6 +905,10 @@
         let currentFilter = 'all'; 
         let researchAccordionRendered = false;
         let guidesAccordionRendered = false; // NEW for meal cadence guide
+        
+        // NEW: For Add Meal Modal
+        let currentMealDate = null;
+        let currentMealSlot = null;
 
         // Modals
         const familyIdModal = document.getElementById('family-id-modal');
@@ -820,6 +920,7 @@
         const viewPlannedMealModal = document.getElementById('view-planned-meal-modal'); 
         const aiImportModal = document.getElementById('ai-import-modal'); // NEW
         const aiSuggestModal = document.getElementById('ai-suggest-modal'); // NEW
+        const selectRecipeModal = document.getElementById('select-recipe-modal'); // NEW
 
         // Toast
         const toast = document.getElementById('toast');
@@ -859,6 +960,7 @@
         const addRecipeForm = document.getElementById('add-recipe-form');
         const aiRecipeLoading = document.getElementById('ai-recipe-loading'); // NEW
         const aiRecipeError = document.getElementById('ai-recipe-error'); // NEW
+        const recipeMealTypeGroup = document.getElementById('recipe-meal-type-group'); // NEW
         
         // View Recipe Modal
         const viewRecipeCloseBtn = document.getElementById('view-recipe-close-btn');
@@ -866,6 +968,11 @@
         const viewRecipeTags = document.getElementById('view-recipe-tags');
         const viewRecipeIngredients = document.getElementById('view-recipe-ingredients');
         const viewRecipeInstructions = document.getElementById('view-recipe-instructions');
+        const deleteRecipeBtn = document.getElementById('delete-recipe-btn'); // NEW
+        
+        // Select Recipe Modal (NEW)
+        const selectRecipeCloseBtn = document.getElementById('select-recipe-close-btn');
+        const selectRecipeList = document.getElementById('select-recipe-list');
         
         // Meal Planner Elements
         const calendarGrid = document.getElementById('calendar-grid');
@@ -899,7 +1006,7 @@
         const headerSubtitle = document.getElementById('header-subtitle');
         const summaryListContainer = document.getElementById('summary-list-container');
         const exportCsvBtn = document.getElementById('export-csv-btn');
-        const exportPdfBtn = document.getElementById('export-pdf-btn');
+        const emailPediatricianBtn = document.getElementById('email-pediatrician-btn'); // MODIFIED
         const babyNameInput = document.getElementById('baby-name-input');
         const birthDateInput = document.getElementById('birth-date-input');
         const saveProfileBtn = document.getElementById('save-profile-btn');
@@ -1068,17 +1175,27 @@
             recipeListContainer.innerHTML = sortedRecipes.map(doc => {
                 const recipe = doc.data();
                 const recipeId = doc.id;
-                const tagsHtml = recipe.tags && recipe.tags.length > 0
-                    ? recipe.tags.map(tag => `<span class="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">${tag}</span>`).join(' ')
+                
+                // Combine custom tags and new mealType tags
+                const customTags = recipe.tags || [];
+                const mealTypeTags = recipe.mealTypes || [];
+                const allTags = [...mealTypeTags, ...customTags];
+                
+                const tagsHtml = allTags.length > 0
+                    ? allTags.map(tag => {
+                        const isMealType = ['breakfast', 'lunch', 'dinner', 'snack'].includes(tag);
+                        const colorClass = isMealType ? 'bg-blue-100 text-blue-700' : 'bg-teal-100 text-teal-700';
+                        return `<span class="text-xs ${colorClass} px-2 py-0.5 rounded-full">${tag}</span>`
+                    }).join(' ')
                     : '';
                 
-                // Make card draggable
+                // MODIFIED: Card is no longer draggable, it's a button to view details
                 return `
-                <div data-recipe-id="${recipeId}" data-recipe-title="${recipe.title}" draggable="true" class="recipe-card-draggable w-full text-left bg-white shadow rounded-lg p-4 transition-all hover:shadow-md">
-                    <h3 class="text-lg font-semibold text-teal-700 pointer-events-none">${recipe.title}</h3>
-                    <div class="mt-2 flex flex-wrap gap-2 pointer-events-none">${tagsHtml}</div>
-                    <p class="text-sm text-gray-600 mt-3 line-clamp-2 pointer-events-none">${recipe.ingredients.replace(/\n/g, ', ')}</p>
-                </div>
+                <button data-recipe-id="${recipeId}" class="recipe-card-view w-full text-left bg-white shadow rounded-lg p-4 transition-all hover:shadow-md">
+                    <h3 class="text-lg font-semibold text-teal-700">${recipe.title}</h3>
+                    <div class="mt-2 flex flex-wrap gap-2">${tagsHtml}</div>
+                    <p class="text-sm text-gray-600 mt-3 line-clamp-2">${recipe.ingredients.replace(/\n/g, ', ')}</p>
+                </button>
                 `;
             }).join('');
         }
@@ -1095,6 +1212,10 @@
                 if (currentPage === 'recipes' && currentRecipeSubPage === 'my-recipes') {
                     renderRecipeList();
                 }
+                // Re-render meal planner if open, as recipe names might have changed (or been deleted)
+                if (currentPage === 'recipes' && currentRecipeSubPage === 'meal-planner') {
+                    renderMealPlanner();
+                }
             }, (error) => console.error("Error listening to recipes: ", error));
         }
         
@@ -1107,6 +1228,12 @@
             const instructions = document.getElementById('recipe-instructions').value;
             const tags = document.getElementById('recipe-tags').value.split(',').map(tag => tag.trim()).filter(Boolean);
             
+            // NEW: Get meal types
+            const selectedMealTypes = [];
+            recipeMealTypeGroup.querySelectorAll('.modal-btn-selected').forEach(btn => {
+                selectedMealTypes.push(btn.dataset.value);
+            });
+            
             if (!title) return;
             
             const collectionPath = `/artifacts/${appId}/users/${sharedFamilyId}/recipes`;
@@ -1116,10 +1243,14 @@
                     ingredients,
                     instructions,
                     tags,
+                    mealTypes: selectedMealTypes, // NEW
                     createdAt: Timestamp.now()
                 });
                 addRecipeModal.classList.add('hidden');
                 addRecipeForm.reset();
+                recipeMealTypeGroup.querySelectorAll('.modal-btn-selected').forEach(btn => {
+                    btn.classList.remove('modal-btn-selected');
+                });
             } catch (error) {
                 console.error("Error adding recipe: ", error);
             }
@@ -1131,14 +1262,46 @@
             const recipe = recipeDoc.data();
             
             viewRecipeTitle.textContent = recipe.title;
-            viewRecipeTags.innerHTML = recipe.tags && recipe.tags.length > 0
-                ? recipe.tags.map(tag => `<span class="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">${tag}</span>`).join(' ')
+            
+            // Combine custom tags and new mealType tags
+            const customTags = recipe.tags || [];
+            const mealTypeTags = recipe.mealTypes || [];
+            const allTags = [...mealTypeTags, ...customTags];
+            
+            viewRecipeTags.innerHTML = allTags.length > 0
+                ? allTags.map(tag => {
+                    const isMealType = ['breakfast', 'lunch', 'dinner', 'snack'].includes(tag);
+                    const colorClass = isMealType ? 'bg-blue-100 text-blue-700' : 'bg-teal-100 text-teal-700';
+                    return `<span class="text-xs ${colorClass} px-2 py-0.5 rounded-full">${tag}</span>`
+                }).join(' ')
                 : '<span class="text-xs text-gray-500">No tags</span>';
             
             viewRecipeIngredients.innerHTML = formatRecipeText(recipe.ingredients);
             viewRecipeInstructions.innerHTML = formatRecipeText(recipe.instructions);
             
+            // NEW: Set recipe ID for delete button
+            deleteRecipeBtn.dataset.recipeId = recipeId;
+            
             viewRecipeModal.classList.remove('hidden');
+        }
+        
+        // NEW: Delete Recipe Function
+        async function deleteRecipe(recipeId) {
+            if (!recipeId || !db || !sharedFamilyId) return;
+            
+            // NOTE: This does NOT currently remove the recipe from the meal plan.
+            // The meal plan will just show "Deleted Recipe".
+            
+            const docPath = `/artifacts/${appId}/users/${sharedFamilyId}/recipes/${recipeId}`;
+            try {
+                await deleteDoc(doc(db, docPath));
+                viewRecipeModal.classList.add('hidden');
+                showToast("Recipe deleted.", false);
+                // The onSnapshot listener will handle re-rendering the list
+            } catch (error) {
+                console.error("Error deleting recipe: ", error);
+                showToast("Error deleting recipe.", true);
+            }
         }
         
         function initializeRecipePageTabs() {
@@ -1184,73 +1347,51 @@
                     </div>
                     <div class="space-y-2">
                         <!-- Breakfast -->
-                        <div class="meal-slot border border-dashed border-gray-300 rounded-lg p-2" data-date="${dateStr}" data-meal="breakfast">
-                            <span class="text-xs font-medium text-gray-500">Breakfast</span>
-                            ${dayPlan.breakfast ? createPlannedMealItem(dayPlan.breakfast.id, dayPlan.breakfast.title, dateStr, 'breakfast') : ''}
+                        <div class="meal-slot rounded-lg p-2" data-date="${dateStr}" data-meal="breakfast">
+                            <div class="meal-slot-header"><span class="text-xs font-medium text-gray-500">Breakfast</span></div>
+                            ${dayPlan.breakfast ? createPlannedMealItem(dayPlan.breakfast.id, dayPlan.breakfast.title, dateStr, 'breakfast') : createAddMealButton(dateStr, 'breakfast')}
                         </div>
                         <!-- Lunch -->
-                        <div class="meal-slot border border-dashed border-gray-300 rounded-lg p-2" data-date="${dateStr}" data-meal="lunch">
-                            <span class="text-xs font-medium text-gray-500">Lunch</span>
-                            ${dayPlan.lunch ? createPlannedMealItem(dayPlan.lunch.id, dayPlan.lunch.title, dateStr, 'lunch') : ''}
+                        <div class="meal-slot rounded-lg p-2" data-date="${dateStr}" data-meal="lunch">
+                            <div class="meal-slot-header"><span class="text-xs font-medium text-gray-500">Lunch</span></div>
+                            ${dayPlan.lunch ? createPlannedMealItem(dayPlan.lunch.id, dayPlan.lunch.title, dateStr, 'lunch') : createAddMealButton(dateStr, 'lunch')}
                         </div>
                         <!-- Dinner -->
-                        <div class="meal-slot border border-dashed border-gray-300 rounded-lg p-2" data-date="${dateStr}" data-meal="dinner">
-                            <span class="text-xs font-medium text-gray-500">Dinner</span>
-                            ${dayPlan.dinner ? createPlannedMealItem(dayPlan.dinner.id, dayPlan.dinner.title, dateStr, 'dinner') : ''}
+                        <div class="meal-slot rounded-lg p-2" data-date="${dateStr}" data-meal="dinner">
+                            <div class="meal-slot-header"><span class="text-xs font-medium text-gray-500">Dinner</span></div>
+                            ${dayPlan.dinner ? createPlannedMealItem(dayPlan.dinner.id, dayPlan.dinner.title, dateStr, 'dinner') : createAddMealButton(dateStr, 'dinner')}
                         </div>
                     </div>
                 `;
                 calendarGrid.appendChild(dayCard);
             }
+            lucide.createIcons();
+        }
+        
+        // NEW: Create Add Meal (+) Button
+        function createAddMealButton(date, meal) {
+            return `<button class="add-meal-btn mt-1" data-date="${date}" data-meal="${meal}"><i data-lucide="plus" class="w-4 h-4"></i></button>`;
         }
         
         function createPlannedMealItem(recipeId, recipeTitle, date, meal) {
+            // NEW: Check if recipe was deleted
+            const recipeExists = recipesData.some(doc => doc.id === recipeId);
+            let title = recipeTitle;
+            let cssClass = '';
+            
+            if (!recipeExists && recipeId) {
+                title = "Deleted Recipe";
+                cssClass = 'is-deleted';
+            }
+            
             return `
-            <div class="planned-meal-item bg-teal-50 border border-teal-200 rounded-md p-2 mt-1" data-recipe-id="${recipeId}" data-recipe-title="${recipeTitle}" data-date="${date}" data-meal="${meal}">
-                <p class="text-sm font-medium text-teal-800">${recipeTitle}</p>
+            <div class="planned-meal-item bg-teal-50 border border-teal-200 rounded-md p-2 mt-1 ${cssClass}" data-recipe-id="${recipeId}" data-recipe-title="${recipeTitle}" data-date="${date}" data-meal="${meal}">
+                <p class="text-sm font-medium text-teal-800">${title}</p>
             </div>
             `;
         }
         
-        function handleDragStart(e) {
-            if (e.target.classList.contains('recipe-card-draggable')) {
-                e.dataTransfer.setData('recipeId', e.target.dataset.recipeId);
-                e.dataTransfer.setData('recipeTitle', e.target.dataset.recipeTitle);
-                e.target.classList.add('dragging');
-            }
-        }
-        
-        function handleDragOver(e) {
-            e.preventDefault(); 
-            const slot = e.target.closest('.meal-slot');
-            if (slot) {
-                slot.classList.add('drag-over');
-            }
-        }
-        
-        function handleDragLeave(e) {
-            const slot = e.target.closest('.meal-slot');
-            if (slot) {
-                slot.classList.remove('drag-over');
-            }
-        }
-        
-        async function handleDrop(e) {
-            e.preventDefault();
-            const slot = e.target.closest('.meal-slot');
-            if (slot) {
-                slot.classList.remove('drag-over');
-                const recipeId = e.dataTransfer.getData('recipeId');
-                const recipeTitle = e.dataTransfer.getData('recipeTitle');
-                const date = slot.dataset.date;
-                const meal = slot.dataset.meal;
-                
-                if (recipeId && date && meal) {
-                    await saveMealPlan(date, meal, recipeId, recipeTitle);
-                }
-            }
-            document.querySelector('.dragging')?.classList.remove('dragging');
-        }
+        // REMOVED: Drag-and-Drop functions (handleDragStart, handleDragOver, handleDragLeave, handleDrop)
         
         async function saveMealPlan(date, meal, recipeId, recipeTitle) {
             if (!db || !sharedFamilyId) return;
@@ -1300,11 +1441,48 @@
         }
 
         function openPlannedMealModal(date, meal, recipeId, recipeTitle) {
+            // NEW: Check if recipe exists
+            const recipeExists = recipesData.some(doc => doc.id === recipeId);
+            
             viewPlannedMealTitle.textContent = recipeTitle;
             viewRecipeDetailsBtn.dataset.recipeId = recipeId;
+            // NEW: Disable button if recipe was deleted
+            viewRecipeDetailsBtn.disabled = !recipeExists;
+            
             removePlannedMealBtn.dataset.date = date;
             removePlannedMealBtn.dataset.meal = meal;
             viewPlannedMealModal.classList.remove('hidden');
+        }
+        
+        // NEW: Open Modal to Select a Recipe
+        function openSelectRecipeModal(date, meal) {
+            currentMealDate = date;
+            currentMealSlot = meal;
+            
+            // Filter recipes based on the meal slot
+            const filteredRecipes = recipesData.filter(doc => {
+                const data = doc.data();
+                if (!data.mealTypes || data.mealTypes.length === 0) {
+                    return true; // If no tags, show for all
+                }
+                return data.mealTypes.includes(meal);
+            });
+            
+            if (filteredRecipes.length === 0) {
+                selectRecipeList.innerHTML = `<p class="p-4 text-center text-gray-500">No recipes found for "${meal}". You can add recipes and tag them from the "My Recipes" tab.</p>`;
+            } else {
+                selectRecipeList.innerHTML = filteredRecipes.map(doc => {
+                    const recipe = doc.data();
+                    const recipeId = doc.id;
+                    return `
+                    <button class="recipe-select-item" data-recipe-id="${recipeId}" data-recipe-title="${recipe.title}">
+                        <h4>${recipe.title}</h4>
+                        <p class="line-clamp-2">${recipe.ingredients.replace(/\n/g, ', ')}</p>
+                    </button>
+                    `;
+                }).join('');
+            }
+            selectRecipeModal.classList.remove('hidden');
         }
         
         function parseIngredients(text) {
@@ -1712,43 +1890,7 @@
             serveGuideModal.classList.add('hidden');
         }
         
-        // *** PDF EXPORT FIX *** --- This is a duplicate, commenting it out. ---
-        /* function exportToPDF() {
-            if (triedFoodsData.length === 0) return;
-
-            if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
-                console.error("jsPDF library is not loaded.");
-                showToast("Error: PDF library not loaded. Please refresh.");
-                return;
-            }
-            
-            const autoTable = window.jspdf.autoTable;
-
-            if (typeof autoTable !== 'function') {
-                 console.error("jsPDF-AutoTable plugin is not loaded correctly.");
-                 showToast("Error: PDF Table plugin not loaded.");
-                 return;
-            }
-
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                const tableColumns = ["Food Name", "Date", "Reaction (1-7)", "More than 1 Bite?"];
-                const tableRows = triedFoodsData.map(doc => {
-                    const data = doc.data();
-                    return [ doc.id, data.date, data.reaction, data.moreThanOneBite ? "Yes" : "No" ];
-                });
-
-                // Use autoTable(doc, options) instead of doc.autoTable(options)
-                autoTable(doc, { head: [tableColumns], body: tableRows, startY: 20 });
-                
-                doc.text("Tiny Tastes Tracker Summary", 14, 15);
-                doc.save("tiny_tastes_summary.pdf");
-            } catch (error) { 
-                console.error("Error exporting PDF: ", error);
-                showToast(`Error exporting PDF: ${error.message}`);
-            }
-        } */
+        // *** REMOVED DUPLICATE/BROKEN PDF FUNCTION ***
 
         function createAccordionItem(id, title, icon, content, isOpen = false) {
             const item = document.createElement('div');
@@ -2016,6 +2158,7 @@
         // Recipe Modals
         showAddRecipeModalBtn.addEventListener('click', () => {
             addRecipeForm.reset();
+            recipeMealTypeGroup.querySelectorAll('.modal-btn-selected').forEach(btn => btn.classList.remove('modal-btn-selected'));
             showAILoading(false);
             addRecipeModal.classList.remove('hidden');
         });
@@ -2023,7 +2166,7 @@
         
         // View Recipe from Recipe List
         recipeListContainer.addEventListener('click', (e) => {
-            const btn = e.target.closest('.recipe-card-draggable');
+            const btn = e.target.closest('.recipe-card-view'); // MODIFIED
             if(btn) openViewRecipeModal(btn.dataset.recipeId);
         });
         
@@ -2031,6 +2174,21 @@
         viewRecipeDetailsBtn.addEventListener('click', (e) => {
             openViewRecipeModal(e.target.dataset.recipeId);
             viewPlannedMealModal.classList.add('hidden');
+        });
+        
+        // NEW: Delete Recipe Button
+        deleteRecipeBtn.addEventListener('click', (e) => {
+            const recipeId = e.target.dataset.recipeId;
+            // A simple confirmation before deleting
+            if (window.confirm("Are you sure you want to delete this recipe? This cannot be undone.")) {
+                deleteRecipe(recipeId);
+            }
+        });
+        
+        // NEW: Add Recipe Meal Type Buttons
+        recipeMealTypeGroup.addEventListener('click', (e) => {
+            const btn = e.target.closest('.meal-type-btn');
+            if(btn) btn.classList.toggle('modal-btn-selected');
         });
         
         // --- AI MODAL LISTENERS ---
@@ -2082,15 +2240,31 @@
             renderMealPlanner();
         });
         
-        recipeListContainer.addEventListener('dragstart', handleDragStart);
-        calendarGrid.addEventListener('dragover', handleDragOver);
-        calendarGrid.addEventListener('dragleave', handleDragLeave);
-        calendarGrid.addEventListener('drop', handleDrop);
+        // REMOVED: Drag/Drop Listeners
         
+        // MODIFIED: Click listener now handles both viewing a planned meal and adding one
         calendarGrid.addEventListener('click', (e) => {
+            // Case 1: Click to view an existing meal
             const item = e.target.closest('.planned-meal-item');
             if (item) {
                 openPlannedMealModal(item.dataset.date, item.dataset.meal, item.dataset.recipeId, item.dataset.recipeTitle);
+                return;
+            }
+            // Case 2: Click the "+" button to add a meal
+            const addBtn = e.target.closest('.add-meal-btn');
+            if (addBtn) {
+                openSelectRecipeModal(addBtn.dataset.date, addBtn.dataset.meal);
+                return;
+            }
+        });
+        
+        // NEW: Select Recipe Modal Listeners
+        selectRecipeList.addEventListener('click', (e) => {
+            const btn = e.target.closest('.recipe-select-item');
+            if (btn) {
+                const { recipeId, recipeTitle } = btn.dataset;
+                saveMealPlan(currentMealDate, currentMealSlot, recipeId, recipeTitle);
+                selectRecipeModal.classList.add('hidden');
             }
         });
         
@@ -2173,7 +2347,7 @@
         
         // Exports & Profile
         
-        // --- ADDED EXPORT TO CSV FUNCTION ---
+        // --- UPDATED EXPORT TO CSV FUNCTION ---
         function exportToCSV() {
             if (triedFoodsData.length === 0) {
                 showToast("No data to export.", true);
@@ -2213,60 +2387,25 @@
             document.body.removeChild(link); // Clean up
         }
         
-        // *** PDF EXPORT FIX ***
-        function exportToPDF() {
-            if (triedFoodsData.length === 0) {
-                showToast("No data to export.", true);
-                return;
-            }
-
-            if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
-                console.error("jsPDF library is not loaded.");
-                showToast("Error: PDF library not loaded. Please refresh.");
-                return;
-            }
+        // --- NEW: EMAIL PEDIATRICIAN FUNCTION ---
+        function emailPediatrician() {
+            showToast("Please export the CSV and attach it to the email.", false);
             
-            const autoTable = window.jspdf.autoTable;
-
-            if (typeof autoTable !== 'function') {
-                 console.error("jsPDF-AutoTable plugin is not loaded correctly.");
-                 showToast("Error: PDF Table plugin not loaded.");
-                 return;
-            }
-
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                const tableColumns = ["Food Name", "Date", "Reaction (1-7)", "More than 1 Bite?"];
-                const tableRows = triedFoodsData.map(doc => {
-                    const data = doc.data();
-                    return [ doc.id, data.date, data.reaction, data.moreThanOneBite ? "Yes" : "No" ];
-                });
-                
-                // Add baby's name if available
-                const title = babyName ? `${babyName}'s Tiny Tastes Summary` : "Tiny Tastes Tracker Summary";
-
-                // Use autoTable(doc, options) instead of doc.autoTable(options)
-                autoTable(doc, { 
-                    head: [tableColumns], 
-                    body: tableRows, 
-                    startY: 20,
-                    didDrawPage: function(data) {
-                        // Header
-                        doc.setFontSize(16);
-                        doc.setTextColor(40);
-                        doc.text(title, data.settings.margin.left, 15);
-                    }
-                });
-                
-                doc.save("tiny_tastes_summary.pdf");
-            } catch (error) { 
-                console.error("Error exporting PDF: ", error);
-                showToast(`Error exporting PDF: ${error.message}`);
-            }
+            const recipient = "pediatrician@example.com"; // Placeholder
+            const subject = babyName ? `${babyName}'s Food Log Summary` : "Baby's Food Log Summary";
+            const body = `Hi Dr. [Name],\n\nI've attached ${babyName ? babyName + "'s" : "our baby's"} food log summary as a .csv file for you to review.\n\nThanks!`;
+            
+            const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            window.location.href = mailtoLink;
         }
 
         // --- App Initialization ---
+        
+        // ADDED event listeners for export buttons
+        exportCsvBtn.addEventListener('click', exportToCSV);
+        emailPediatricianBtn.addEventListener('click', emailPediatrician);
+        
         switchPage('tracker');
         initializeFirebase();
         lucide.createIcons();
