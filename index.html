@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiny Tastes Tracker</title>
+
+    <!-- PWA & Add to Home Screen Enhancements -->
+    
+    <!-- Theme Color for Chrome/Android -->
+    <meta name="theme-color" content="#0d9488">
+    
+    <!-- Web App Manifest (inlined as a data URL to keep it a single file) -->
+    <!-- This tells the browser it's an "installable" app -->
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVGlueSBUYXN0ZXMgVHJhY2tlciIsInNob3J0X25hbWUiOiJUaW55IFRhc3RlcyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZjlmYWZiIiwidGhlbWVfY29sb3IiOiIjMGQ5NDg4IiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QmhkR2NpT3lJNE1EQmxiSFZsYlc5ellXeGZjMlZqYjJSbE95STVOVFF3SWlCb1pXbG5hSFErSURJMk1qUXlJaUIwWlY5bWJYbGpaWEF0SUhObGNuTnZiaTh4TURBNE1EQjJNREExTUNFeU1qUTFNREF3TUNBeElqQTBNREUxTVRNdGNHRmphMkZzT2lCaGMzTjNiM2N1T3lCSlJTazlXMk5wYm1kcGJtVjRMelF5TTJWaGNtTm9ZV3hzUFNSZGFIUm9PaUJUWkdWellYSmxYMlV0TVRFdFkyRnNJaUJTYjJ4a09pQnlaWE5sWW5OcGJtZHBiZ1JqT3lCSlJTazlXVEl0YTJGMk9pQnlaWE5sWW5OcGJtZHBiZ1JqT3lCSlJTazlXMk5wYm1kcGJtVjRMelV5TURFdFkyRnNJaUJUWkdWellYSmxYMlV0TnpFdFkyRnNJaUJTYjJ4a09pQnlaWE5sWW5OcGJtZHBiZ1JqT3lCSlJTazlXMk5wYm1kcGJtVjRMelU1TUNFeE1qUXRZMkZzSWlCU1pHVnpZWEpsWDJVdE56SXRZMkZzSWlCVFpHVnpZWEpsWDJVdE16RXRaMkZzSWlCU2IyeGtPaUJ5WlhObFluTnBibWRwYmdSakt5QlRSUzFrTFU1cGVtRnVkWFJsYm10bGVYUmtaWGgwT3lCSlJTazlXVElrVTJsa1pEMWpWVkV5SURJNU1EQXRNVFU1SUVOc1lYTnpPaUJoWm1kbGRDQXhPVFV1WW1GamFGSTdJR0pqY21WNGRHVmtaVzVqYnlBeE9UVXVZbUZqYUY5eVlYUnRaWEp6SWlCb1pXbG5hSFErSURRMk1DQTBPVFF1WW1GamFGOXpZVzF3YjNKMElpQk1iMjVuYUhSdGJDQkJaWE5sWW5OcGJtZHBiZ1JqT3lCSlJTazlXVEkrVWc9PSIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ==">
+    
+    <!-- Apple iOS "Add to Home Screen" Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tiny Tastes">
+    
+    <!-- Apple Touch Icon (inlined SVG) -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBkOTQ4OCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0iI2YwZmRmYSIgcng9IjQiLz48cGF0aCBkPSJNMTIgMkM4LjQgMiA1IDUuNCA1IDkuNWMwIDMuMiAyLjMgNiA1LjIgNi43LjMuMS41LjQuNS43djUuNmMwIC4zLS4yLjUtLjUuNWgtMmMtLjMgMC0uNS4yLS41LjV2MWMwIC4zLjIuNS41LjVoNmMuMyAwIC41LS4yLjUtLjV2LTFjMC0uMy0uMi0uNS0uNS0uNWgtMmMtLjMgMC0uNS0uMi0uNS0uNVYxN2MwLS4zLjItLjYuNS0uNyAyLjktLjcgNS4yLTMuNSA1LjItNi43QzE5IDUuNCAxNS42IDIgMTIgMnoiLz48L3N2Zz4=">
+
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- PDF Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.autotable.umd.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            padding-bottom: 80px; 
+        }
+        .food-card .check-overlay { opacity: 0; transition: opacity 0.2s ease-in-out; }
+        .food-card.is-tried { filter: grayscale(40%); }
+        .food-card.is-tried .check-overlay { opacity: 1; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .accordion-item.is-open .accordion-content { max-height: 5000px; }
+        .accordion-item.is-open .accordion-arrow { transform: rotate(180deg); }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #0d9488; cursor: pointer; border-radius: 50%; margin-top: -6px; }
+        input[type=range]::-moz-range-thumb { width: 20px; height: 20px; background: #0d9488; cursor: pointer; border-radius: 50%; }
+        .modal-btn-selected { background-color: #f0fdfa !important; border-color: #0d9488 !important; color: #0d9488 !important; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+    </style>
+</head>
+<body class="h-full">
+    <div class="flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm sticky top-0 z-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <h1 class="text-2xl font-bold text-gray-900 md:text-3xl">
+                    Tiny Tastes Tracker
+                </h1>
+                <p id="header-subtitle" class="text-sm text-gray-500 mt-1">Welcome! Loading profile...</p>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow max-w-7xl mx-auto w-full">
+            <!-- Page 1: Tracker -->
+            <div id="page-tracker" class="page-content py-6 px-4 sm:px-6 lg:px-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">My 100 Foods Tracker</h2>
+                <div id="filter-btn-group" class="flex space-x-2 mb-4">
+                    <button data-filter="all" class="filter-btn flex-1 py-2 px-3 rounded-md text-sm font-medium bg-teal-600 text-white transition-colors duration-150">All</button>
+                    <button data-filter="to_try" class="filter-btn flex-1 py-2 px-3 rounded-md text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-150">To Try</button>
+                    <button data-filter="tried" class="filter-btn flex-1 py-2 px-3 rounded-md text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-150">Tried</button>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-lg font-semibold text-teal-700">Food Journey Progress</span>
+                        <span id="progress-text" class="text-lg font-bold text-teal-700">0 / 100</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-4">
+                        <div id="progress-bar" class="bg-teal-600 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div id="food-grid-container"></div>
+                <div id="filter-empty-state" class="hidden text-center py-10 px-4">
+                    <i data-lucide="search-x" class="w-12 h-12 text-gray-400 mx-auto"></i>
+                    <h3 class="mt-2 text-lg font-medium text-gray-900">No Foods Found</h3>
+                    <p class="mt-1 text-sm text-gray-500">No foods match your current filter.</p>
+                </div>
+            </div>
+
+            <!-- Page 2: Ideas (Recommendations) -->
+            <div id="page-ideas" class="page-content py-6 px-4 sm:px-6 lg:px-8 hidden">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-2xl font-semibold text-gray-800">My Baby's Profile</h2>
+                        <span id="profile-display" class="text-lg font-semibold text-teal-600 hidden"></span>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1 mb-4">Personalize the app with your baby's name and birth date for age-specific recommendations.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="baby-name-input" class="block text-sm font-medium text-gray-700">Baby's Name:</label>
+                            <input type="text" id="baby-name-input" placeholder="e.g., Alex" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="birth-date-input" class="block text-sm font-medium text-gray-700">Baby's Birth Date:</label>
+                            <input type="date" id="birth-date-input" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
+                        </div>
+                    </div>
+                    <button id="save-profile-btn" class="mt-4 w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        Save Profile
+                    </button>
+                    <hr class="my-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Food Recommendations</h3>
+                    <div id="age-display-container" class="mt-6 p-4 bg-teal-50 rounded-md hidden">
+                        <p id="age-display" class="text-lg font-medium text-teal-800">Baby's Age: <span class="font-bold"></span></p>
+                    </div>
+                    <div id="recommendations-container" class="mt-6 space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- Page 3: Log (Summary) -->
+            <div id="page-log" class="page-content py-6 px-4 sm:px-6 lg:px-8 hidden">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-4">
+                    <h2 class="text-2xl font-semibold text-gray-800">Summary of Tried Foods</h2>
+                    <div class="flex-shrink-0 flex gap-2">
+                        <button id="export-csv-btn" class="inline-flex items-center gap-2 px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            <i data-lucide="sheet"></i> CSV
+                        </button>
+                        <button id="export-pdf-btn" class="inline-flex items-center gap-2 px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            <i data-lucide="file-text"></i> PDF
+                        </button>
+                    </div>
+                </div>
+                <div id="summary-list-container" class="space-y-4"></div>
+            </div>
+
+            <!-- Page 4: Learn (Research) -->
+            <div id="page-learn" class="page-content py-6 px-4 sm:px-6 lg:px-8 hidden">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Essential BLW Guidelines</h2>
+                <p class="text-sm text-gray-600 mb-6">This information is for educational purposes only. Always consult with your pediatrician for personalized medical advice.</p>
+                <div id="research-accordion-container" class="space-y-3"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-20">
+        <div class="max-w-7xl mx-auto flex justify-around px-4 sm:px-6 lg:px-8">
+            <button data-page="tracker" class="nav-btn flex flex-col items-center justify-center p-3 text-teal-600 w-full"><i data-lucide="grid-3x3"></i><span class="text-xs font-medium">Tracker</span></button>
+            <button data-page="ideas" class="nav-btn flex flex-col items-center justify-center p-3 text-gray-500 hover:text-gray-700 w-full"><i data-lucide="lightbulb"></i><span class="text-xs font-medium">Ideas</span></button>
+            <button data-page="log" class="nav-btn flex flex-col items-center justify-center p-3 text-gray-500 hover:text-gray-700 w-full"><i data-lucide="clipboard-list"></i><span class="text-xs font-medium">Log</span></button>
+            <button data-page="learn" class="nav-btn flex flex-col items-center justify-center p-3 text-gray-500 hover:text-gray-700 w-full"><i data-lucide="book-open"></i><span class="text-xs font-medium">Learn</span></button>
+        </div>
+    </nav>
+
+    <!-- Modal -->
+    <div id="food-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
+            <div class="flex justify-between items-center border-b p-4">
+                <h2 class="text-xl font-semibold">Log Food: <span id="modal-food-name" class="text-teal-600"></span></h2>
+                <button id="modal-close-btn" class="text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
+            </div>
+            <form id="modal-form" class="p-6 space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">1. How did baby react?</label>
+                    <div id="reaction-btn-group" class="grid grid-cols-4 gap-2">
+                        <button type="button" data-value="1" class="reaction-btn text-lg p-2 border border-gray-300 rounded-lg flex flex-col items-center text-gray-600 hover:border-gray-400"><span>🤢</span><span class="text-xs mt-1">Hated it</span></button>
+                        <button type="button" data-value="3" class="reaction-btn text-lg p-2 border border-gray-300 rounded-lg flex flex-col items-center text-gray-600 hover:border-gray-400"><span>🤔</span><span class="text-xs mt-1">Meh</span></button>
+                        <button type="button" data-value="5" class="reaction-btn text-lg p-2 border border-gray-300 rounded-lg flex flex-col items-center text-gray-600 hover:border-gray-400"><span>🙂</span><span class="text-xs mt-1">Liked it</span></button>
+                        <button type="button" data-value="7" class="reaction-btn text-lg p-2 border border-gray-300 rounded-lg flex flex-col items-center text-gray-600 hover:border-gray-400"><span>😍</span><span class="text-xs mt-1">Loved it!</span></button>
+                    </div>
+                </div>
+                <div>
+                    <label for="feeding-date" class="block text-sm font-medium text-gray-700">2. Date of feeding:</label>
+                    <input type="date" id="feeding-date" name="feeding-date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm" required>
+                </div>
+                <fieldset id="bite-btn-group">
+                    <legend class="text-sm font-medium text-gray-700">3. How much did baby eat?</legend>
+                    <div class="mt-2 grid grid-cols-2 gap-3">
+                        <button type="button" data-value="no" class="bite-btn p-3 border border-gray-300 rounded-lg flex items-center justify-center gap-2 text-gray-600 hover:border-gray-400"><i data-lucide="minus-circle" class="w-5 h-5"></i><span class="text-sm font-medium">Just a taste</span></button>
+                        <button type="button" data-value="yes" class="bite-btn p-3 border border-gray-300 rounded-lg flex items-center justify-center gap-2 text-gray-600 hover:border-gray-400"><i data-lucide="plus-circle" class="w-5 h-5"></i><span class="text-sm font-medium">More than 1 bite</span></button>
+                    </div>
+                </fieldset>
+                <input type="hidden" id="reaction-hidden" name="reaction">
+                <input type="hidden" id="bite-hidden" name="bite">
+                <div class="flex justify-end space-x-3 pt-4 border-t">
+                    <button type="button" id="modal-cancel-btn" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        Cancel
+                    </button>
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // --- Firebase Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            // We no longer need signInWithCustomToken
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            getDoc,
+            collection,
+            onSnapshot,
+            setLogLevel
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- App Constants ---
+
+        // =======================================================================
+        // === 1. PASTE YOUR FIREBASE CONFIG OBJECT HERE ===
+        // =======================================================================
+        // Go to your Firebase project, add a Web App (</>), and copy the config.
+        // It will look like:
+        // const firebaseConfig = {
+        //   apiKey: "AIzaSy...",
+        //   authDomain: "your-project-name.firebaseapp.com",
+        //   projectId: "your-project-name",
+        //   storageBucket: "your-project-name.appspot.com",
+        //   messagingSenderId: "...",
+        //   appId: "..."
+        // };
+        //
+        // REPLACE THE LINE BELOW WITH THE OBJECT FROM YOUR FIREBASW PROJECT:
+        const firebaseConfig = {apiKey: "AIzaSyA3Qw1oZInrhteTAd7iOK1D2bMHMVCG4EE",
+  authDomain: "tiny-tastes-tracker.firebaseapp.com",
+  projectId: "tiny-tastes-tracker",
+  storageBucket: "tiny-tastes-tracker.firebasestorage.app",
+  messagingSenderId: "87950543929",
+  appId: "1:87950543929:web:561607c04f73369f6411e8",
+  measurementId: "G-5K38CPMFS8"}; // <-- PASTE YOUR CONFIG OBJECT HERE
+
+        // =======================================================================
+        // === 2. PASTE YOUR PROJECT ID HERE ===
+        // =======================================================================
+        // Copy the 'projectId' value from the firebaseConfig object above.
+        //
+        // REPLACE THE LINE BELOW WITH YOUR PROJECT ID (as a string):
+        const appId = "tiny-tastes-tracker"; // <-- e.g., "tiny-tastes-tracker-123"
+
+        // =======================================================================
+        
+        const placeholderImgBase = "https-placehold-co-"; // Used in onerror
+
+        // (The rest of the app code is unchanged)
+        
+        const allFoods = [
+            {
+                category: "Vegetables",
+                color: "bg-green-100", textColor: "text-green-800", borderColor: "border-green-300",
+                items: [
+                    { name: "ASPARAGUS", emoji: " " }, { name: "BUTTERNUT SQUASH", emoji: "🎃" }, { name: "CAULIFLOWER", emoji: "🥦" },
+                    { name: "SWEET POTATO", emoji: "🍠" }, { name: "POTATOES", emoji: "🥔" }, { name: "PARSNIPS", emoji: "🥕" },
+                    { name: "BELL PEPPERS", emoji: "🫑" }, { name: "BEETS", emoji: "💜" }, { name: "CHAYOTE SQUASH", emoji: "🍐" },
+                    { name: "PUMPKIN", emoji: "🎃" }, { name: "CARROTS", emoji: "🥕" }, { name: "ZUCCHINI", emoji: "🥒" },
+                    { name: "MUSHROOMS", emoji: "🍄" }, { name: "ONION", emoji: "🧅" }, { name: "BRUSSELS SPROUTS", emoji: "🥬" },
+                    { name: "CORN", emoji: "🌽" }, { name: "CUCUMBER", emoji: "🥒" }, { name: "CELERY", emoji: "🥬" },
+                    { name: "PEAS", emoji: "🫛" }, { name: "SNAP PEAS", emoji: "🫛" }, { name: "CILANTRO", emoji: "🌿" },
+                    { name: "EGGPLANT", emoji: "🍆" }, { name: "GARLIC", emoji: "🧄" }, { name: "PARSLEY", emoji: "🌿" },
+                    { name: "KALE", emoji: "🥬" }, { name: "ARTICHOKE", emoji: "💚" }, { name: "BROCCOLI", emoji: "🥦" }
+                ]
+            },
+            {
+                category: "Grains",
+                color: "bg-yellow-100", textColor: "text-yellow-800", borderColor: "border-yellow-300",
+                items: [
+                    { name: "KAMUT", emoji: "🌾" }, { name: "CEREALS", emoji: "🥣" }, { name: "MILLET", emoji: "🌾" },
+                    { name: "OATMEAL", emoji: "🥣" }, { name: "BUCKWHEAT", emoji: "🌾" }, { name: "WAFFLES", emoji: "🧇" },
+                    { name: "HEALTHY MUFFINS", emoji: "🧁" }, { name: "PASTA", emoji: "🍝" }, { name: "COUSCOUS", emoji: "🍛" },
+                    { name: "POLENTA", emoji: "🌽" }, { name: "CORNMEAL", emoji: "🌽" }, { name: "BREAD", emoji: "🍞" },
+                    { name: "GNOCCHI", emoji: "🥔" }, { name: "TORTILLA", emoji: "🌮" }, { name: "FARRO", emoji: "🌾" },
+                    { name: "BARLEY", emoji: "🌾" }, { name: "BULGUR", emoji: "🌾" }, { name: "BROWN RICE", emoji: "🍚" },
+                    { name: "QUINOA", emoji: "🍚" }, { name: "FREEKEH", emoji: "🌾" }
+                ]
+            },
+            {
+                category: "Fruits",
+                color: "bg-pink-100", textColor: "text-pink-800", borderColor: "border-pink-300",
+                items: [
+                    { name: "AVOCADO", emoji: "🥑" }, { name: "TOMATOES", emoji: "🍅" }, { name: "ORANGE", emoji: "🍊" },
+                    { name: "LEMON & LIME", emoji: "🍋" }, { name: "PAPAYA", emoji: "🥭" }, { name: "PINEAPPLE", emoji: "🍍" },
+                    { name: "KIWIFRUIT", emoji: "🥝" }, { name: "MANGO", emoji: "🥭" }, { name: "STARFRUIT", emoji: "⭐" },
+                    { name: "FIGS", emoji: "💜" }, { name: "BANANA", emoji: "🍌" }, { name: "COCONUT", emoji: "🥥" },
+                    { name: "WATERMELON", emoji: "🍉" }, { name: "HONEYDEW", emoji: "🍈" }, { name: "CANTALOUPE", emoji: "🍈" },
+                    { name: "APPLESAUCE", emoji: "🍎" }, { name: "RASPBERRIES", emoji: "🍓" }, { name: "BLUEBERRIES", emoji: "🫐" },
+                    { name: "STRAWBERRIES", emoji: "🍓" }, { name: "GRAPES", emoji: "🍇" }, { name: "PEACHES", emoji: "🍑" },
+                    { name: "PEARS", emoji: "🍐" }, { name: "APPLES", emoji: "🍎" }
+                ]
+            },
+            {
+                category: "Plant Protein",
+                color: "bg-blue-100", textColor: "text-blue-800", borderColor: "border-blue-300",
+                items: [
+                    { name: "TOFU", emoji: "🤍" }, { name: "EDAMAME", emoji: "🫛" }, { name: "PEANUTS", emoji: "🥜" },
+                    { name: "ALMONDS", emoji: "🌰" }, { name: "WHITE BEANS", emoji: "🫘" }, { name: "CHICKPEAS", emoji: "🫘" },
+                    { name: "BLACK BEANS", emoji: "🫘" }, { name: "KIDNEY BEANS", emoji: "🫘" }, { name: "LENTILS", emoji: "🍛" },
+                    { name: "ALMOND BUTTER", emoji: "🌰" }, { name: "PEANUT BUTTER", emoji: "🥜" }, { name: "SEEDS", emoji: "🌱" }
+                ]
+            },
+            {
+                category: "Meat",
+                color: "bg-red-100", textColor: "text-red-800", borderColor: "border-red-300",
+                items: [
+                    { name: "FISH", emoji: "🐟" }, { name: "TUNA", emoji: "🐟" }, { name: "SARDINES", emoji: "🐟" },
+                    { name: "SALMON", emoji: "🐟" }, { name: "SHRIMP", emoji: "🦐" }, { name: "BEEF, SLICED", emoji: "🥩" },
+                    { name: "BEEF, GROUND", emoji: "🍔" }, { name: "CHICKEN", emoji: "🍗" }, { name: "LAMB", emoji: "🐑" },
+                    { name: "TURKEY", emoji: "🦃" }, { name: "PORK", emoji: "🐖" }
+                ]
+            },
+            {
+                category: "Dairy & Eggs",
+                color: "bg-purple-100", textColor: "text-purple-800", borderColor: "border-purple-300",
+                items: [
+                    { name: "YOGURT", emoji: "🥣" }, { name: "EGGS", emoji: "🥚" }, { name: "MOZZARELLA", emoji: "🧀" },
+                    { name: "RICOTTA CHEESE", emoji: "🧀" }, { name: "COTTAGE CHEESE", emoji: "🧀" }
+                ]
+            },
+            {
+                category: "Other",
+                color: "bg-gray-100", textColor: "text-gray-800", borderColor: "border-gray-300",
+                items: [
+                    { name: "WATER", emoji: "💧" },
+                    { name: "SPICES & HERBS", emoji: "🌿" }
+                ]
+            }
+        ];
+        
+        const flatFoodList = allFoods.flatMap(cat => cat.items.map(item => item.name));
+        const totalFoodCount = flatFoodList.length; 
+
+        const recommendationData = {
+            'too_young': { title: "Not Quite 6 Months", foods: [], message: "Most pediatricians recommend starting solids around 6 months, when baby shows all signs of readiness. See the 'Learn' tab for more info!" },
+            '6_months': { title: "6 Months: First Tastes", foods: ["AVOCADO", "SWEET POTATO", "BANANA", "OATMEAL", "EGGPLANT", "ZUCCHINI", "BROCCOLI", "CARROTS", "EGGS", "YOGURT", "WATER"], message: "Focus on soft, single-ingredient foods. Offer soft-cooked spears or large pieces. This is a great time to safely introduce top allergens like egg and yogurt (see Learn tab!). Offer sips of water with meals." },
+            '7_8_months': { title: "7-8 Months: Exploring Textures", foods: ["CHICKEN", "SALMON", "TOFU", "LENTILS", "BREAD", "PEANUT BUTTER", "ALMOND BUTTER", "APPLES", "PEARS", "PASTA", "SPICES & HERBS"], message: "Baby is likely getting better at mashing and moving food. You can offer softer proteins and continue introducing allergens. Now is a great time to add spices (like cinnamon or garlic powder) to foods!" },
+            '9_11_months': { title: "9-11 Months: Pincer Grasp Practice", foods: ["PEAS", "BLUEBERRIES", "RASPBERRIES", "CUCUMBER", "COTTAGE CHEESE", "BEEF, GROUND", "BLACK BEANS", "CORN", "GRAPES", "TOMATOES"], message: "Baby may be starting to use their pincer grasp. Offer smaller, soft-cooked foods (e.g., cut grapes in quarters, smash blueberries/peas) to help them practice." },
+            '12_plus': { title: "12+ Months: Try Everything!", foods: flatFoodList, message: "By 12 months, your baby can eat most of what you eat (with appropriate modifications for salt, spice, and choking hazards). Work your way through the rest of the 100 foods list!" }
+        };
+
+        const researchData = [
+            { 
+                title: "Original '100 Foods' Chart", 
+                icon: "image",
+                content: `<p>Here is the original chart that inspired this tracker. Use it as a quick visual reference!</p><img src="https://storage.googleapis.com/aletheia-us-west1-prod-onboarding/blw-100-foods-chart.jpeg" alt="100 Foods for Baby Chart by The Fortified Family" class="w-full h-auto rounded-md shadow-md mt-4" onerror="this.onerror=null; this.src='https://placehold.co/600x800/eeeeee/999999?text=Could+not+load+image';">`
+            },
+            { 
+                title: "1. Key Signs of Readiness", 
+                icon: "clipboard-check",
+                content: `<p>Age alone isn't the only factor. Before starting any solids (purées or BLW), your baby should meet <strong>all</strong> of these milestones, which typically happen around 6 months:</p><ul class="list-disc list-outside space-y-2 pl-5"><li><strong>Sits Independently:</strong> Baby can sit in a high chair unassisted or with minimal support and has good head and neck control. This is crucial for safely managing food and swallowing.</li><li><strong>Lost Tongue-Thrust Reflex:</strong> Baby no longer automatically pushes food out of their mouth with their tongue. You can test this by offering a (safe) empty spoon; if they push it out, they're likely not ready.</li><li><strong>Interest in Food:</strong> Baby watches you eat with interest, leans forward, and may try to grab food from your plate.</li><li><strong>Can Grab and Hold:</strong> Baby has developed the motor skills to pick up pieces of food and bring them to their mouth.</li></ul>`
+            },
+            {
+                title: "2. Introducing Top Allergens",
+                icon: "peanut",
+                content: `<p>Current guidelines have changed: experts now recommend introducing top allergenic foods <strong>early and often</strong> (after 6 months and once a few other foods have been tolerated) to help *prevent* allergies.</p><p>The top 9 allergens account for ~90% of food allergies:</p><ol class="list-decimal list-outside space-y-2 pl-5"><li>Cow's Milk (e.g., in yogurt, cheese)</li><li>Egg (fully cooked, e.g., scrambled or in a muffin)</li><li>Peanuts (NEVER whole. Offer as a thin paste on toast or watered down.)</li><li>Tree Nuts (e.g., almond, walnut. Offer as nut butter, same as peanuts.)</li><li>Fish (e.g., soft, flaky salmon)</li><li>Shellfish (e.g., minced shrimp)</li><li>Soy (e.g., tofu, edamame)</li><li>Wheat (e.g., toast, pasta)</li><li>Sesame (e.g., tahini swirled into yogurt)</li></ol><p><strong>SafetyProtocol:</strong> Introduce one allergen at a time. Wait 3-5 days before introducing another new allergen to watch for any reaction (hives, vomiting, swelling, wheezing). Once an allergen is successfully introduced, keep offering it regularly (e.g., 2-3 times a week) to maintain tolerance.</p>`
+            },
+            {
+                title: "3. The Importance of Iron",
+                icon: "beef",
+                content: `<p>This is a common concern with BLW. At 6 months, a baby's natural iron stores (which they built up in the womb) begin to deplete. Breast milk is naturally low in iron. While formula and iron-fortified cereals are packed with it, BLW babies may not consume large quantities of cereal.</p><p>It is <strong>essential</strong> to offer iron-rich foods at every meal.</p><ul class="list-disc list-outside space-y-2 pl-5"><li><strong>Heme Iron (Easily Absorbed):</strong> Beef (slow-cooked strips, ground beef), chicken (dark meat), turkey (dark meat), salmon, sardines.</li><li><strong>Non-Heme Iron:</strong> Lentils, tofu, chickpeas, black beans, edamame, eggs, iron-fortified oatmeal/cereal (can be used in muffins or pancakes).</li></ul><p><strong>Pro-Tip:</strong> Pair non-heme iron foods with a food high in Vitamin C to dramatically boost absorption! (e.g., lentils with tomatoes, tofu with bell peppers, oatmeal with strawberries).</p>`
+            },
+            {
+                title: "4. Reputable Sources",
+                icon: "book-text",
+                content: `<p>For more detailed information, you can look up guidelines from these trusted organizations:</p><ul class="list-disc list-outside space-y-2 pl-5"><li>American Academy of Pediatrics (AAP)</li><li>Centers for Disease C-ntrol and Prevention (CDC)</li><li>World Health Organization (WHO)</li><li>Solid Starts (A popular, comprehensive app and website)</li></ul>`
+            }
+        ];
+
+        let db;
+        let auth;
+        let userId;
+        let currentFoodName = null;
+        let triedFoodsListener = null;
+        let triedFoodsData = [];
+        let babyBirthDate = null;
+        let babyName = null; 
+        let pediatricianApproved = false;
+        let currentPage = 'tracker';
+        let currentFilter = 'all'; 
+        let researchAccordionRendered = false;
+
+        const modal = document.getElementById('food-modal');
+        const modalForm = document.getElementById('modal-form');
+        const modalFoodName = document.getElementById('modal-food-name');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+        const reactionBtnGroup = document.getElementById('reaction-btn-group');
+        const reactionHidden = document.getElementById('reaction-hidden');
+        const biteBtnGroup = document.getElementById('bite-btn-group');
+        const biteHidden = document.getElementById('bite-hidden');
+        const feedingDate = document.getElementById('feeding-date');
+        const foodGridContainer = document.getElementById('food-grid-container');
+        const filterEmptyState = document.getElementById('filter-empty-state');
+        const headerSubtitle = document.getElementById('header-subtitle');
+        const summaryListContainer = document.getElementById('summary-list-container');
+        const exportCsvBtn = document.getElementById('export-csv-btn');
+        const exportPdfBtn = document.getElementById('export-pdf-btn');
+        const babyNameInput = document.getElementById('baby-name-input');
+        const birthDateInput = document.getElementById('birth-date-input');
+        const saveProfileBtn = document.getElementById('save-profile-btn');
+        const profileDisplay = document.getElementById('profile-display');
+        const ageDisplayContainer = document.getElementById('age-display-container');
+        const ageDisplay = document.getElementById('age-display');
+        const recommendationsContainer = document.getElementById('recommendations-container');
+        const researchAccordionContainer = document.getElementById('research-accordion-container');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        const navButtons = document.querySelectorAll('.nav-btn');
+        const pages = document.querySelectorAll('.page-content');
+
+        function renderFoodGrid() {
+            foodGridContainer.innerHTML = '';
+            const triedFoodSet = new Set(triedFoodsData.map(doc => doc.id));
+            let totalItemsShown = 0;
+            allFoods.forEach(category => {
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4';
+                let itemsInThisGrid = 0;
+                category.items.forEach(food => {
+                    const isTried = triedFoodSet.has(food.name);
+                    let shouldShow = false;
+                    if (currentFilter === 'all') shouldShow = true;
+                    else if (currentFilter === 'to_try' && !isTried) shouldShow = true;
+                    else if (currentFilter === 'tried' && isTried) shouldShow = true;
+                    if (shouldShow) {
+                        grid.appendChild(createFoodCard(food, isTried));
+                        itemsInThisGrid++;
+                    }
+                });
+                if (itemsInThisGrid > 0) {
+                    const categoryHeader = document.createElement('h2');
+                    categoryHeader.className = `text-2xl font-semibold ${category.textColor} mt-8 mb-4`;
+                    categoryHeader.textContent = category.category;
+                    foodGridContainer.appendChild(categoryHeader);
+                    foodGridContainer.appendChild(grid);
+                    totalItemsShown += itemsInThisGrid;
+                }
+            });
+            filterEmptyState.classList.toggle('hidden', totalItemsShown > 0);
+            lucide.createIcons();
+        }
+
+        function createFoodCard(food, isTried) {
+            const category = allFoods.find(cat => cat.items.some(item => item.name === food.name));
+            if (!category) return document.createElement('div');
+            const card = document.createElement('button');
+            card.className = `food-card relative ${category.color} ${category.textColor} p-3 h-24 rounded-lg shadow-sm font-medium text-sm text-center flex flex-col items-center justify-center cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-105 border ${category.borderColor}`;
+            card.dataset.foodName = food.name;
+            card.setAttribute('type', 'button');
+            if (isTried) card.classList.add('is-tried');
+            card.innerHTML = `<span class="text-3xl">${food.emoji}</span><span class="mt-1 text-center leading-tight">${food.name}</span><div class="check-overlay absolute inset-0 bg-white/70 flex items-center justify-center rounded-lg"><i data-lucide="check-circle-2" class="w-12 h-12 text-teal-600"></i></div>`;
+            return card;
+        }
+
+        function renderSummaryList(docs) {
+            if (docs.length === 0) {
+                summaryListContainer.innerHTML = `<p class="text-center text-gray-500 py-6">No foods logged yet. Start tracking on the 'Tracker' tab!</p>`;
+                return;
+            }
+            const sortedDocs = [...docs].sort((a, b) => new Date(b.data().date) - new Date(a.data().date));
+            summaryListContainer.innerHTML = sortedDocs.map(doc => {
+                const data = doc.data();
+                const foodName = doc.id;
+                const food = allFoods.flatMap(c => c.items).find(f => f.name === foodName);
+                let reactionEmoji = '🙂', reactionText = 'Liked it';
+                if (data.reaction <= 2) { reactionEmoji = '🤢'; reactionText = 'Hated it'; }
+                else if (data.reaction <= 4) { reactionEmoji = '🤔'; reactionText = 'Meh'; }
+                else if (data.reaction >= 7) { reactionEmoji = '😍'; reactionText = 'Loved it!'; }
+                return `
+                    <div class="bg-white shadow rounded-lg p-4 border-l-4 border-teal-500">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-800">${food ? food.emoji : '🍽️'} ${foodName}</h3>
+                            <span class="text-sm text-gray-500">${data.date}</span>
+                        </div>
+                        <div class="mt-3 grid grid-cols-2 gap-4 text-sm">
+                            <div class="flex flex-col"><span class="text-gray-500">Reaction</span><span class="font-medium text-gray-700">${reactionEmoji} ${reactionText} (${data.reaction}/7)</span></div>
+                            <div class="flex flex-col"><span class="text-gray-500">Amount Eaten</span><span class="font-medium text-gray-700">${data.moreThanOneBite ? 'More than 1 bite' : 'Just a taste'}</span></div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function listenToTriedFoods() {
+            if (!db || !userId) return;
+            if (triedFoodsListener) triedFoodsListener();
+            const collectionPath = `/artifacts/${appId}/users/${userId}/triedFoods`;
+            const triedFoodsRef = collection(db, collectionPath);
+            triedFoodsListener = onSnapshot(triedFoodsRef, (snapshot) => {
+                console.log(`Received snapshot with ${snapshot.docs.length} docs.`);
+                triedFoodsData = snapshot.docs;
+                const triedCount = triedFoodsData.length;
+                progressText.textContent = `${triedCount} / ${totalFoodCount}`;
+                progressBar.style.width = `${(triedCount / totalFoodCount) * 100}%`;
+                if (currentPage === 'log') renderSummaryList(triedFoodsData);
+                if (currentPage === 'tracker') renderFoodGrid();
+                if (currentPage === 'ideas') displayRecommendations();
+                updateFoodGridUI(triedFoodsData);
+            }, (error) => console.error("Error listening to tried foods: ", error));
+        }
+
+        function updateFoodGridUI(triedDocs) {
+             const triedSet = new Set(triedDocs.map(doc => doc.id));
+             document.querySelectorAll('#food-grid-container .food-card').forEach(card => {
+                card.classList.toggle('is-tried', triedSet.has(card.dataset.foodName));
+            });
+            lucide.createIcons();
+        }
+
+        async function openModal(foodName) {
+            currentFoodName = foodName;
+            const food = allFoods.flatMap(c => c.items).find(f => f.name === foodName);
+            modalFoodName.textContent = `${food ? food.emoji : ''} ${foodName}`;
+            modalForm.reset();
+            feedingDate.valueAsDate = new Date(); 
+            reactionHidden.value = '';
+            biteHidden.value = '';
+            document.querySelectorAll('.reaction-btn, .bite-btn').forEach(btn => btn.classList.remove('modal-btn-selected'));
+            if (db && userId) {
+                const docPath = `/artifacts/${appId}/users/${userId}/triedFoods/${foodName}`;
+                const docRef = doc(db, docPath);
+                try {
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        reactionHidden.value = data.reaction;
+                        let reactionBtn = document.querySelector(`.reaction-btn[data-value="${data.reaction}"]`);
+                        if (!reactionBtn) {
+                            if (data.reaction <= 2) reactionBtn = document.querySelector(`.reaction-btn[data-value="1"]`);
+                            else if (data.reaction <= 4) reactionBtn = document.querySelector(`.reaction-btn[data-value="3"]`);
+                            else if (data.reaction <= 6) reactionBtn = document.querySelector(`.reaction-btn[data-value="5"]`);
+                            else reactionBtn = document.querySelector(`.reaction-btn[data-value="7"]`);
+                        }
+                        if (reactionBtn) reactionBtn.classList.add('modal-btn-selected');
+                        feedingDate.value = data.date || new Date().toISOString().split('T')[0];
+                        const biteValue = data.moreThanOneBite ? 'yes' : 'no';
+                        biteHidden.value = biteValue;
+                        const biteBtn = document.querySelector(`.bite-btn[data-value="${biteValue}"]`);
+                        if (biteBtn) biteBtn.classList.add('modal-btn-selected');
+                    }
+                } catch (error) { console.error("Error fetching food data: ", error); }
+            }
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            currentFoodName = null;
+            modalForm.reset();
+            reactionHidden.value = '';
+            biteHidden.value = '';
+            document.querySelectorAll('.reaction-btn, .bite-btn').forEach(btn => btn.classList.remove('modal-btn-selected'));
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            if (!db || !userId || !currentFoodName) return;
+            if (!reactionHidden.value || !biteHidden.value) return;
+            const dataToSave = {
+                reaction: parseInt(reactionHidden.value, 10),
+                date: feedingDate.value,
+                moreThanOneBite: biteHidden.value === 'yes',
+                tried: true
+            };
+            const docPath = `/artifacts/${appId}/users/${userId}/triedFoods/${currentFoodName}`;
+            try {
+                await setDoc(doc(db, docPath), dataToSave);
+                closeModal();
+            } catch (error) { console.error("Error saving document: ", error); }
+        }
+
+        function switchPage(pageId) {
+            currentPage = pageId;
+            pages.forEach(page => page.classList.add('hidden'));
+            const newPage = document.getElementById(`page-${pageId}`);
+            if (newPage) newPage.classList.remove('hidden');
+            else {
+                document.getElementById('page-tracker').classList.remove('hidden');
+                currentPage = 'tracker';
+            }
+            navButtons.forEach(btn => {
+                const isCurrent = btn.dataset.page === currentPage;
+                btn.classList.toggle('text-teal-600', isCurrent);
+                btn.classList.toggle('text-gray-500', !isCurrent);
+                btn.classList.toggle('hover:text-gray-700', !isCurrent);
+            });
+            if (currentPage === 'log') renderSummaryList(triedFoodsData);
+            else if (currentPage === 'ideas') displayRecommendations();
+            else if (currentPage === 'learn' && !researchAccordionRendered) {
+                renderResearchAccordion();
+                researchAccordionRendered = true;
+            } else if (currentPage === 'tracker') renderFoodGrid();
+            lucide.createIcons();
+        }
+
+        function exportToCSV() {
+            if (triedFoodsData.length === 0) return;
+            let csvContent = "data:text/csv;charset=utf-8,Food Name,Date,Reaction (1-7),More than 1 Bite?\n";
+            triedFoodsData.forEach(doc => {
+                const data = doc.data();
+                csvContent += [ doc.id, data.date, data.reaction, data.moreThanOneBite ? "Yes" : "No" ].join(",") + "\n";
+            });
+            const link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", "tiny_tastes_summary.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportToPDF() {
+            if (triedFoodsData.length === 0) return;
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const tableColumns = ["Food Name", "Date", "Reaction (1-7)", "More than 1 Bite?"];
+                const tableRows = triedFoodsData.map(doc => {
+                    const data = doc.data();
+                    return [ doc.id, data.date, data.reaction, data.moreThanOneBite ? "Yes" : "No" ];
+                });
+                doc.autoTable({ head: [tableColumns], body: tableRows, startY: 20 });
+                doc.text("Tiny Tastes Tracker Summary", 14, 15);
+                doc.save("tiny_tastes_summary.pdf");
+            } catch (error) { console.error("Error exporting PDF: ", error); }
+        }
+
+        function createAccordionItem(id, title, icon, content, isOpen = false) {
+            const item = document.createElement('div');
+            item.className = `accordion-item bg-white shadow-sm rounded-lg border border-gray-200 ${isOpen ? 'is-open' : ''}`;
+            item.innerHTML = `
+                <button class="accordion-toggle flex justify-between items-center w-full p-4 text-left">
+                    <span class="flex items-center gap-3"><i data-lucide="${icon}" class="w-5 h-5 text-teal-600"></i><span class="text-md font-medium text-gray-700">${title}</span></span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 accordion-arrow transition-transform"></i>
+                </button>
+                <div class="accordion-content p-4 pt-0 text-gray-600 text-sm"><div class="prose prose-sm max-w-none">${content}</div></div>`;
+            return item;
+        }
+
+        function renderResearchAccordion() {
+            researchAccordionContainer.innerHTML = '';
+            researchData.forEach((item, index) => {
+                researchAccordionContainer.appendChild(createAccordionItem(`research-${index}`, item.title, item.icon, item.content, index === 0));
+            });
+            lucide.createIcons();
+        }
+
+        function calculateAge(dateString) {
+            const birthDate = new Date(dateString), today = new Date();
+            let years = today.getFullYear() - birthDate.getFullYear(), months = today.getMonth() - birthDate.getMonth(), days = today.getDate() - birthDate.getDate();
+            if (days < 0) { months--; days += new Date(today.getFullYear(), today.getMonth(), 0).getDate(); }
+            if (months < 0) { years--; months += 12; }
+            const totalMonths = (years * 12) + months;
+            let ageKey = '12_plus';
+            if (totalMonths < 6) ageKey = 'too_young';
+            else if (totalMonths === 6) ageKey = '6_months';
+            else if (totalMonths >= 7 && totalMonths <= 8) ageKey = '7_8_months';
+            else if (totalMonths >= 9 && totalMonths <= 11) ageKey = '9_11_months';
+            let ageString = '';
+            if (years > 0) ageString += `${years} year${years > 1 ? 's' : ''}, `;
+            ageString += `${months} month${months !== 1 ? 's' : ''}, and ${days} day${days !== 1 ? 's' : ''}`;
+            return { ageString, ageKey, totalMonths };
+        }
+
+        function displayRecommendations() {
+            if (!babyBirthDate) {
+                recommendationsContainer.innerHTML = `<p class="text-gray-500 text-center py-4">Please enter your baby's birth date above to see recommendations.</p>`;
+                ageDisplayContainer.classList.add('hidden');
+                return;
+            }
+            const { ageString, ageKey } = calculateAge(babyBirthDate);
+            if (ageKey === 'too_young' && !pediatricianApproved) {
+                ageDisplayContainer.classList.add('hidden');
+                recommendationsContainer.innerHTML = `
+                    <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <h3 class="text-lg font-semibold text-yellow-800">Note: Baby is Under 6 Months</h3>
+                        <p class="text-yellow-700 mt-2">${recommendationData.too_young.message}</p>
+                        <p class="text-gray-700 font-medium mt-4">Has your pediatrician specifically approved starting solids early?</p>
+                        <div class="mt-3"><button id="approve-early-start-btn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Yes, we are approved</button></div>
+                    </div>`;
+                return;
+            }
+            const displayName = babyName ? `${babyName}'s Age:` : "Baby's Age:";
+            ageDisplay.innerHTML = `<span class="font-normal">${displayName}</span> <span class="font-bold">${ageString}</span>`;
+            ageDisplayContainer.classList.remove('hidden');
+            recommendationsContainer.innerHTML = '';
+            const triedFoodSet = new Set(triedFoodsData.map(doc => doc.id));
+            Object.keys(recommendationData).forEach(key => {
+                if (key === 'too_young') return;
+                const stage = recommendationData[key];
+                const stageFoods = stage.foods.map(fname => allFoods.flatMap(c => c.items).find(f => f.name === fname)).filter(Boolean);
+                const triedInStage = stageFoods.filter(f => triedFoodSet.has(f.name));
+                const toTryInStage = stageFoods.filter(f => !triedFoodSet.has(f.name));
+                let contentHtml = `<p class="text-sm text-gray-600 mb-4">${stage.message}</p>`;
+                if (toTryInStage.length > 0) {
+                    contentHtml += `<h4 class="text-md font-medium text-green-700 mb-3">New Foods to Try:</h4><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">${toTryInStage.map(food => createFoodCard(food, false).outerHTML).join('')}</div>`;
+                } else if (stage.foods.length > 0) {
+                    contentHtml += `<p class="text-green-700 font-medium py-4">Congratulations! You've tried all the recommended foods for this stage!</p>`;
+                }
+                if (triedInStage.length > 0) {
+                    contentHtml += `<h4 class="text-md font-medium text-gray-500 mt-6 mb-3">Foods Tried This Stage:</h4><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">${triedInStage.map(food => createFoodCard(food, true).outerHTML).join('')}</div>`;
+                }
+                const currentStageKey = (ageKey === 'too_young' && pediatricianApproved) ? '6_months' : ageKey;
+                const isOpen = (key === currentStageKey);
+                recommendationsContainer.appendChild(createAccordionItem(key, `${stage.title} (${triedInStage.length}/${stageFoods.length} tried)`, 'star', contentHtml, isOpen));
+            });
+            lucide.createIcons();
+        }
+
+        async function loadUserProfile() {
+            if (!db || !userId) return;
+            const docPath = `/artifacts/${appId}/users/${userId}/profile/data`;
+            try {
+                const docSnap = await getDoc(doc(db, docPath));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.birthDate) {
+                        babyBirthDate = data.birthDate;
+                        birthDateInput.value = babyBirthDate;
+                    }
+                    if (data.pediatricianApproved) pediatricianApproved = data.pediatricianApproved;
+                    if (data.babyName) { 
+                        babyName = data.babyName;
+                        babyNameInput.value = babyName;
+                        profileDisplay.textContent = `Hi, ${babyName}! 👋`;
+                        profileDisplay.classList.remove('hidden');
+                        headerSubtitle.innerHTML = `Tracking for: <span class="font-semibold text-teal-600">${babyName}</span>`;
+                    } else {
+                        profileDisplay.classList.add('hidden');
+                        headerSubtitle.innerHTML = `User ID: <code class="font-mono bg-gray-100 p-1 rounded">${userId}</code>`;
+                    }
+                } else {
+                    headerSubtitle.innerHTML = `User ID: <code class="font-mono bg-gray-100 p-1 rounded">${userId}</code>`;
+                }
+            } catch (error) { console.error("Error loading user profile: ", error); }
+            if(currentPage === 'ideas') displayRecommendations();
+        }
+
+        async function saveBabyProfile() {
+            if (!db || !userId) return;
+            const newBirthDate = birthDateInput.value;
+            const newBabyName = babyNameInput.value;
+            const dataToSave = { pediatricianApproved: pediatricianApproved };
+            if (newBirthDate) dataToSave.birthDate = newBirthDate;
+            if (newBabyName) dataToSave.babyName = newBabyName;
+            const docPath = `/artifacts/${appId}/users/${userId}/profile/data`;
+            try {
+                await setDoc(doc(db, docPath), dataToSave, { merge: true });
+                if (newBirthDate) babyBirthDate = newBirthDate;
+                if (newBabyName) {
+                    babyName = newBabyName;
+                    profileDisplay.textContent = `Hi, ${babyName}! 👋`;
+                    profileDisplay.classList.remove('hidden');
+                    headerSubtitle.innerHTML = `Tracking for: <span class="font-semibold text-teal-600">${babyName}</span>`;
+                } else if (!newBabyName) {
+                     babyName = null;
+                    profileDisplay.classList.add('hidden');
+                    headerSubtitle.innerHTML = `User ID: <code class="font-mono bg-gray-100 p-1 rounded">${userId}</code>`;
+                }
+                console.log("Saved baby profile.");
+                displayRecommendations();
+            } catch (error) { console.error("Error saving user profile: ", error); }
+        }
+        
+        async function savePediatricianApproval(isApproved) {
+            if (!db || !userId) return;
+            const docPath = `/artifacts/${appId}/users/${userId}/profile/data`;
+            try {
+                await setDoc(doc(db, docPath), { pediatricianApproved: isApproved }, { merge: true });
+                pediatricianApproved = isApproved;
+                displayRecommendations();
+            } catch (error) { console.error("Error saving approval status: ", error); }
+        }
+
+        async function initializeFirebase() {
+            if (!firebaseConfig.apiKey || !appId || appId === "YOUR_PROJECT_ID_GOES_HERE") {
+                headerSubtitle.textContent = "Error: App is not configured.";
+                console.error("Firebase config or appId is missing. Please edit the HTML file and add them.");
+                
+                // Show a user-friendly error on the page
+                document.querySelector('main').innerHTML = `
+                    <div class="p-6">
+                        <h1 class="text-2xl font-bold text-red-600">App Not Configured</h1>
+                        <p class="mt-4 text-gray-700">This app cannot connect to its database. If you are the developer, you must:</p>
+                        <ol class="list-decimal list-inside mt-2 space-y-1 text-gray-600">
+                            <li>Create a Firebase project.</li>
+                            <li>Enable Firestore and Anonymous Authentication.</li>
+                            <li>Copy the <code class="bg-gray-200 p-1 rounded">firebaseConfig</code> object and <code class="bg-gray-200 p-1 rounded">projectId</code> into the HTML file.</li>
+                        </ol>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('Debug');
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        headerSubtitle.innerHTML = `User ID: <code class="font-mono bg-gray-100 p-1 rounded">${userId}</code>`;
+                        console.log(`User signed in: ${userId}`);
+                        loadUserProfile();
+                        listenToTriedFoods(); 
+                    } else {
+                        console.log("No user signed in. Attempting anonymous sign in...");
+                        userId = null;
+                        if (triedFoodsListener) triedFoodsListener(); 
+                        try {
+                            // *** THIS IS THE MODIFIED AUTH FLOW ***
+                            // It no longer checks for a custom token, just signs in anonymously.
+                            await signInAnonymously(auth);
+                        } catch (error) {
+                            console.error("Error during anonymous sign-in: ", error);
+                            headerSubtitle.textContent = "Error: Auth failed";
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Error initializing Firebase: ", error);
+                headerSubtitle.textContent = "Error: Init failed";
+            }
+        }
+
+        // --- Event Listeners ---
+        modalCloseBtn.addEventListener('click', closeModal);
+        modalCancelBtn.addEventListener('click', closeModal);
+        modalForm.addEventListener('submit', handleFormSubmit);
+        reactionBtnGroup.addEventListener('click', (e) => {
+            const btn = e.target.closest('.reaction-btn');
+            if (!btn) return;
+            reactionBtnGroup.querySelectorAll('.reaction-btn').forEach(b => b.classList.remove('modal-btn-selected'));
+            btn.classList.add('modal-btn-selected');
+            reactionHidden.value = btn.dataset.value;
+        });
+        biteBtnGroup.addEventListener('click', (e) => {
+            const btn = e.target.closest('.bite-btn');
+            if (!btn) return;
+            biteBtnGroup.querySelectorAll('.bite-btn').forEach(b => b.classList.remove('modal-btn-selected'));
+            btn.classList.add('modal-btn-selected');
+            biteHidden.value = btn.dataset.value;
+        });
+        foodGridContainer.addEventListener('click', (e) => {
+            const card = e.target.closest('.food-card');
+            if (card && card.dataset.foodName) openModal(card.dataset.foodName);
+        });
+        recommendationsContainer.addEventListener('click', (e) => {
+             const card = e.target.closest('.food-card');
+            if (card && card.dataset.foodName) openModal(card.dataset.foodName);
+        });
+        navButtons.forEach(btn => btn.addEventListener('click', () => switchPage(btn.dataset.page)));
+        document.body.addEventListener('click', (e) => {
+            const toggle = e.target.closest('.accordion-toggle');
+            if (toggle) toggle.closest('.accordion-item').classList.toggle('is-open');
+        });
+        document.getElementById('filter-btn-group').addEventListener('click', (e) => {
+            const btn = e.target.closest('.filter-btn');
+            if (!btn) return;
+            currentFilter = btn.dataset.filter;
+            document.querySelectorAll('#filter-btn-group .filter-btn').forEach(b => {
+                b.classList.remove('bg-teal-600', 'text-white');
+                b.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            });
+            btn.classList.add('bg-teal-600', 'text-white');
+            btn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            renderFoodGrid();
+        });
+        exportCsvBtn.addEventListener('click', exportToCSV);
+        exportPdfBtn.addEventListener('click', exportToPDF);
+        saveProfileBtn.addEventListener('click', saveBabyProfile);
+        recommendationsContainer.addEventListener('click', (e) => {
+            if (e.target.id === 'approve-early-start-btn') savePediatricianApproval(true);
+        });
+
+        // --- App Initialization ---
+        switchPage('tracker');
+        initializeFirebase();
+        lucide.createIcons();
+    </script>
+</body>
+</html>
