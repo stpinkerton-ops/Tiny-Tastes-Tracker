@@ -109,6 +109,10 @@
                     <button id="save-profile-btn" class="mt-4 w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                         Save Profile
                     </button>
+                    <!-- *** NEW LOG OUT BUTTON *** -->
+                    <button id="log-out-btn" class="mt-4 w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        Log Out / Change Family ID
+                    </button>
                     <hr class="my-6">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Food Recommendations</h3>
                     <div id="age-display-container" class="mt-6 p-4 bg-teal-50 rounded-md hidden">
@@ -153,7 +157,7 @@
         </div>
     </nav>
 
-    <!-- Modal -->
+    <!-- Food Log Modal -->
     <div id="food-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
             <div class="flex justify-between items-center border-b p-4">
@@ -163,7 +167,6 @@
             <form id="modal-form" class="p-6 space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">1. How did baby react?</label>
-                    <!-- *** EMOJIS RE-ADDED HERE *** -->
                     <div id="reaction-btn-group" class="grid grid-cols-4 gap-2">
                         <button type="button" data-value="1" class="reaction-btn text-lg p-2 border border-gray-300 rounded-lg flex flex-col items-center text-gray-600 hover:border-gray-400"><span>🤢</span><span class="text-xs mt-1">Hated it</span></button>
                         <button type="button" data-value="3" class="reaction-btn text-lg p-2 border border-gray-300 rounded-lg flex flex-col items-center text-gray-600 hover:border-gray-400"><span>🤔</span><span class="text-xs mt-1">Meh</span></button>
@@ -196,6 +199,25 @@
         </div>
     </div>
 
+    <!-- *** NEW FAMILY ID LOGIN MODAL *** -->
+    <div id="family-id-modal" class="fixed inset-0 bg-gray-600 bg-opacity-90 flex items-center justify-center p-4 z-[999] hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-6">
+            <h2 class="text-2xl font-bold text-gray-800 text-center">Welcome!</h2>
+            <p class="text-center text-gray-600 mt-2 mb-6">Create a shared Family ID to track progress across devices.</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="family-id-input" class="block text-sm font-medium text-gray-700">Create or Join a Family ID</label>
+                    <input type="text" id="family-id-input" placeholder="e.g., smith-baby-2025" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
+                    <p class="mt-2 text-xs text-gray-500">This is case-sensitive. Share it exactly with your family members.</p>
+                </div>
+                <button id="join-family-btn" class="w-full inline-flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    Join / Create Tracker
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script type="module">
         // --- Firebase Imports ---
@@ -203,7 +225,6 @@
         import { 
             getAuth, 
             signInAnonymously, 
-            // We no longer need signInWithCustomToken
             onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
@@ -219,9 +240,7 @@
         // --- App Constants ---
 
         // =======================================================================
-        // === 1. YOUR FIREBASE CONFIG OBJECT ===
-        // =======================================================================
-        // This is your config. It looks perfect!
+        // This is your config from the previous file. It is correct.
         const firebaseConfig = {apiKey: "AIzaSyA3Qw1oZInrhteTAd7iOK1D2bMHMVCG4EE",
             authDomain: "tiny-tastes-tracker.firebaseapp.com",
             projectId: "tiny-tastes-tracker",
@@ -230,17 +249,14 @@
             appId: "1:87950543929:web:561607c04f73369f6411e8",
             measurementId: "G-5K38CPMFS8"};
 
-        // =======================================================================
-        // === 2. YOUR PROJECT ID ===
-        // =======================================================================
-        // This is your project ID. It also looks perfect!
+        // This is your project ID. It is correct.
         const appId = "tiny-tastes-tracker"; 
 
         // =======================================================================
         
         const placeholderImgBase = "https-placehold-co-"; // Used in onerror
 
-        // *** EMOJIS RE-ADDED BELOW ***
+        // Emojis are all present.
         
         const allFoods = [
             {
@@ -364,7 +380,9 @@
 
         let db;
         let auth;
-        let userId;
+        // *** THIS IS THE CRITICAL CHANGE ***
+        // 'userId' is now the shared 'Family ID', not the anonymous auth ID.
+        let sharedFamilyId; 
         let currentFoodName = null;
         let triedFoodsListener = null;
         let triedFoodsData = [];
@@ -375,6 +393,12 @@
         let currentFilter = 'all'; 
         let researchAccordionRendered = false;
 
+        // *** NEW MODAL ELEMENTS ***
+        const familyIdModal = document.getElementById('family-id-modal');
+        const familyIdInput = document.getElementById('family-id-input');
+        const joinFamilyBtn = document.getElementById('join-family-btn');
+
+        const logOutBtn = document.getElementById('log-out-btn');
         const modal = document.getElementById('food-modal');
         const modalForm = document.getElementById('modal-form');
         const modalFoodName = document.getElementById('modal-food-name');
@@ -404,6 +428,8 @@
         const navButtons = document.querySelectorAll('.nav-btn');
         const pages = document.querySelectorAll('.page-content');
 
+        // (renderFoodGrid, createFoodCard, renderSummaryList are unchanged)
+        // ...
         function renderFoodGrid() {
             foodGridContainer.innerHTML = '';
             const triedFoodSet = new Set(triedFoodsData.map(doc => doc.id));
@@ -476,10 +502,13 @@
             }).join('');
         }
 
+        // *** MODIFIED ***
         function listenToTriedFoods() {
-            if (!db || !userId) return;
+            // Now checks for sharedFamilyId
+            if (!db || !sharedFamilyId) return; 
             if (triedFoodsListener) triedFoodsListener();
-            const collectionPath = `/artifacts/${appId}/users/${userId}/triedFoods`;
+            // *** USES sharedFamilyId IN PATH ***
+            const collectionPath = `/artifacts/${appId}/users/${sharedFamilyId}/triedFoods`;
             const triedFoodsRef = collection(db, collectionPath);
             triedFoodsListener = onSnapshot(triedFoodsRef, (snapshot) => {
                 console.log(`Received snapshot with ${snapshot.docs.length} docs.`);
@@ -494,6 +523,8 @@
             }, (error) => console.error("Error listening to tried foods: ", error));
         }
 
+        // (updateFoodGridUI is unchanged)
+        // ...
         function updateFoodGridUI(triedDocs) {
              const triedSet = new Set(triedDocs.map(doc => doc.id));
              document.querySelectorAll('#food-grid-container .food-card').forEach(card => {
@@ -502,6 +533,8 @@
             lucide.createIcons();
         }
 
+
+        // *** MODIFIED ***
         async function openModal(foodName) {
             currentFoodName = foodName;
             const food = allFoods.flatMap(c => c.items).find(f => f.name === foodName);
@@ -511,8 +544,10 @@
             reactionHidden.value = '';
             biteHidden.value = '';
             document.querySelectorAll('.reaction-btn, .bite-btn').forEach(btn => btn.classList.remove('modal-btn-selected'));
-            if (db && userId) {
-                const docPath = `/artifacts/${appId}/users/${userId}/triedFoods/${foodName}`;
+            
+            // *** USES sharedFamilyId IN PATH ***
+            if (db && sharedFamilyId) {
+                const docPath = `/artifacts/${appId}/users/${sharedFamilyId}/triedFoods/${foodName}`;
                 const docRef = doc(db, docPath);
                 try {
                     const docSnap = await getDoc(docRef);
@@ -539,6 +574,8 @@
             lucide.createIcons();
         }
 
+        // (closeModal is unchanged)
+        // ...
         function closeModal() {
             modal.classList.add('hidden');
             currentFoodName = null;
@@ -548,9 +585,11 @@
             document.querySelectorAll('.reaction-btn, .bite-btn').forEach(btn => btn.classList.remove('modal-btn-selected'));
         }
 
+        // *** MODIFIED ***
         async function handleFormSubmit(e) {
             e.preventDefault();
-            if (!db || !userId || !currentFoodName) return;
+            // *** USES sharedFamilyId ***
+            if (!db || !sharedFamilyId || !currentFoodName) return; 
             if (!reactionHidden.value || !biteHidden.value) return;
             const dataToSave = {
                 reaction: parseInt(reactionHidden.value, 10),
@@ -558,13 +597,16 @@
                 moreThanOneBite: biteHidden.value === 'yes',
                 tried: true
             };
-            const docPath = `/artifacts/${appId}/users/${userId}/triedFoods/${currentFoodName}`;
+            // *** USES sharedFamilyId IN PATH ***
+            const docPath = `/artifacts/${appId}/users/${sharedFamilyId}/triedFoods/${currentFoodName}`;
             try {
                 await setDoc(doc(db, docPath), dataToSave);
                 closeModal();
             } catch (error) { console.error("Error saving document: ", error); }
         }
 
+        // (switchPage, exportToCSV, exportToPDF, createAccordionItem, renderResearchAccordion, calculateAge, displayRecommendations are unchanged)
+        // ...
         function switchPage(pageId) {
             currentPage = pageId;
             pages.forEach(page => page.classList.add('hidden'));
@@ -702,9 +744,12 @@
             lucide.createIcons();
         }
 
+        // *** MODIFIED ***
         async function loadUserProfile() {
-            if (!db || !userId) return;
-            const docPath = `/artifacts/${appId}/users/${userId}/profile/data`;
+            // *** USES sharedFamilyId ***
+            if (!db || !sharedFamilyId) return; 
+            // *** USES sharedFamilyId IN PATH ***
+            const docPath = `/artifacts/${appId}/users/${sharedFamilyId}/profile/data`; 
             try {
                 const docSnap = await getDoc(doc(db, docPath));
                 if (docSnap.exists()) {
@@ -722,23 +767,26 @@
                         headerSubtitle.innerHTML = `Tracking for: <span class="font-semibold text-teal-600">${babyName}</span>`;
                     } else {
                         profileDisplay.classList.add('hidden');
-                        headerSubtitle.innerHTML = `User ID: <code class="font-mono bg-gray-100 p-1 rounded">${userId}</code>`;
+                        headerSubtitle.innerHTML = `Family ID: <code class="font-mono bg-gray-100 p-1 rounded">${sharedFamilyId}</code>`;
                     }
                 } else {
-                    headerSubtitle.innerHTML = `User ID: <code class="font-mono bg-gray-100 p-1 rounded">${userId}</code>`;
+                    headerSubtitle.innerHTML = `Family ID: <code class="font-mono bg-gray-100 p-1 rounded">${sharedFamilyId}</code>`;
                 }
             } catch (error) { console.error("Error loading user profile: ", error); }
             if(currentPage === 'ideas') displayRecommendations();
         }
 
+        // *** MODIFIED ***
         async function saveBabyProfile() {
-            if (!db || !userId) return;
+            // *** USES sharedFamilyId ***
+            if (!db || !sharedFamilyId) return; 
             const newBirthDate = birthDateInput.value;
             const newBabyName = babyNameInput.value;
             const dataToSave = { pediatricianApproved: pediatricianApproved };
             if (newBirthDate) dataToSave.birthDate = newBirthDate;
             if (newBabyName) dataToSave.babyName = newBabyName;
-            const docPath = `/artifacts/${appId}/users/${userId}/profile/data`;
+            // *** USES sharedFamilyId IN PATH ***
+            const docPath = `/artifacts/${appId}/users/${sharedFamilyId}/profile/data`;
             try {
                 await setDoc(doc(db, docPath), dataToSave, { merge: true });
                 if (newBirthDate) babyBirthDate = newBirthDate;
@@ -750,16 +798,19 @@
                 } else if (!newBabyName) {
                      babyName = null;
                     profileDisplay.classList.add('hidden');
-                    headerSubtitle.innerHTML = `User ID: <code class="font-mono bg-gray-100 p-1 rounded">${userId}</code>`;
+                    headerSubtitle.innerHTML = `Family ID: <code class="font-mono bg-gray-100 p-1 rounded">${sharedFamilyId}</code>`;
                 }
                 console.log("Saved baby profile.");
                 displayRecommendations();
             } catch (error) { console.error("Error saving user profile: ", error); }
         }
         
+        // *** MODIFIED ***
         async function savePediatricianApproval(isApproved) {
-            if (!db || !userId) return;
-            const docPath = `/artifacts/${appId}/users/${userId}/profile/data`;
+            // *** USES sharedFamilyId ***
+            if (!db || !sharedFamilyId) return; 
+            // *** USES sharedFamilyId IN PATH ***
+            const docPath = `/artifacts/${appId}/users/${sharedFamilyId}/profile/data`;
             try {
                 await setDoc(doc(db, docPath), { pediatricianApproved: isApproved }, { merge: true });
                 pediatricianApproved = isApproved;
@@ -767,23 +818,62 @@
             } catch (error) { console.error("Error saving approval status: ", error); }
         }
 
+        // *** NEW FUNCTION ***
+        // Checks for a Family ID in localStorage. If not found, shows the login modal.
+        // If found, it sets the `sharedFamilyId` and loads the app data.
+        function checkFamilyId() {
+            const storedFamilyId = localStorage.getItem('familyId');
+            if (storedFamilyId) {
+                sharedFamilyId = storedFamilyId;
+                console.log(`Found Family ID: ${sharedFamilyId}`);
+                // Hide modal just in case
+                familyIdModal.classList.add('hidden');
+                // Load the app data
+                loadUserProfile();
+                listenToTriedFoods();
+            } else {
+                console.log("No Family ID found. Showing login modal.");
+                // Show the modal
+                familyIdModal.classList.remove('hidden');
+            }
+        }
+
+        // *** NEW FUNCTION ***
+        // Called when the "Join" button is clicked.
+        function handleFamilyIdJoin() {
+            const newId = familyIdInput.value.trim();
+            if (newId) {
+                localStorage.setItem('familyId', newId);
+                checkFamilyId(); // This will now find the ID and load the app
+            } else {
+                // You could add an error message here
+                console.log("Please enter a valid Family ID.");
+            }
+        }
+
+        // *** NEW FUNCTION ***
+        // Called when the "Log Out" button is clicked.
+        function handleLogOut() {
+            localStorage.removeItem('familyId');
+            // Detach the listener to prevent errors
+            if (triedFoodsListener) triedFoodsListener(); 
+            // Reset all state
+            triedFoodsData = [];
+            babyBirthDate = null;
+            babyName = null;
+            pediatricianApproved = false;
+            sharedFamilyId = null;
+            // Reload the page to show the login modal
+            location.reload();
+        }
+
+        // *** MODIFIED ***
         async function initializeFirebase() {
             if (!firebaseConfig.apiKey || !appId || appId === "YOUR_PROJECT_ID_GOES_HERE") {
                 headerSubtitle.textContent = "Error: App is not configured.";
                 console.error("Firebase config or appId is missing. Please edit the HTML file and add them.");
                 
-                // Show a user-friendly error on the page
-                document.querySelector('main').innerHTML = `
-                    <div class="p-6">
-                        <h1 class="text-2xl font-bold text-red-600">App Not Configured</h1>
-                        <p class="mt-4 text-gray-700">This app cannot connect to its database. If you are the developer, you must:</p>
-                        <ol class="list-decimal list-inside mt-2 space-y-1 text-gray-600">
-                            <li>Create a Firebase project.</li>
-                            <li>Enable Firestore and Anonymous Authentication.</li>
-                            <li>Copy the <code class="bg-gray-200 p-1 rounded">firebaseConfig</code> object and <code class="bg-gray-200 p-1 rounded">projectId</code> into the HTML file.</li>
-                        </ol>
-                    </div>
-                `;
+                // ... (Error display HTML)
                 return;
             }
 
@@ -795,18 +885,16 @@
 
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
-                        userId = user.uid;
-                        headerSubtitle.innerHTML = `User ID: <code class="font-mono bg-gray-100 p-1 rounded">${userId}</code>`;
-                        console.log(`User signed in: ${userId}`);
-                        loadUserProfile();
-                        listenToTriedFoods(); 
+                        // We are signed in anonymously!
+                        // The user.uid is our "ticket" to talk to Firebase.
+                        console.log(`Anonymous auth successful: ${user.uid}`);
+                        // NOW we check for our shared Family ID.
+                        checkFamilyId();
                     } else {
                         console.log("No user signed in. Attempting anonymous sign in...");
-                        userId = null;
+                        sharedFamilyId = null;
                         if (triedFoodsListener) triedFoodsListener(); 
                         try {
-                            // *** THIS IS THE MODIFIED AUTH FLOW ***
-                            // It no longer checks for a custom token, just signs in anonymously.
                             await signInAnonymously(auth);
                         } catch (error) {
                             console.error("Error during anonymous sign-in: ", error);
@@ -870,6 +958,10 @@
             if (e.target.id === 'approve-early-start-btn') savePediatricianApproval(true);
         });
 
+        // *** NEW LISTENERS ***
+        joinFamilyBtn.addEventListener('click', handleFamilyIdJoin);
+        logOutBtn.addEventListener('click', handleLogOut);
+
         // --- App Initialization ---
         switchPage('tracker');
         initializeFirebase();
@@ -877,4 +969,3 @@
     </script>
 </body>
 </html>
-}
