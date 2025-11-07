@@ -33,10 +33,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.autotable.umd.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- .ics file generator -->
+    <script src="https://cdn.jsdelivr.net/npm/ical.js@1.5.0/build/ical.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
             padding-bottom: 80px; 
+            /* Fix for iOS PWA momentum scrolling */
+            -webkit-overflow-scrolling: touch;
         }
         .food-card .check-overlay { opacity: 0; transition: opacity 0.2s ease-in-out; }
         .food-card.is-tried { filter: grayscale(40%); }
@@ -53,9 +57,9 @@
         .prose-static ol { list-style-type: decimal; list-style-position: inside; margin-left: 0.5rem; margin-bottom: 1rem; }
         .prose-static li { margin-bottom: 0.5rem; }
         /* Scrollable modal content */
-        .modal-scroll-content { max-height: 70vh; overflow-y: auto; }
+        .modal-scroll-content { max-height: 70vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
-        /* --- NEW MEAL PLANNER STYLES --- */
+        /* --- MEAL PLANNER STYLES --- */
         /* Sub-tabs for Recipe Page */
         .recipe-sub-nav-btn {
             flex: 1;
@@ -98,6 +102,20 @@
         .planned-meal-item:hover {
             transform: scale(1.03);
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0d9488;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         /* --- END MEAL PLANNER STYLES --- */
     </style>
@@ -170,17 +188,28 @@
                     <div id="age-display-container" class="mt-6 p-4 bg-teal-50 rounded-md hidden">
                         <p id="age-display" class="text-lg font-medium text-teal-800">Baby's Age: <span class="font-bold"></span></p>
                     </div>
+                    <!-- NEW: Meal Cadence Guide added here -->
+                    <div id="guides-accordion-container" class="mt-6 space-y-3"></div>
                     <div id="recommendations-container" class="mt-6 space-y-3"></div>
                 </div>
             </div>
             
             <!-- *** UPDATED RECIPE PAGE WITH PLANNER *** -->
             <div id="page-recipes" class="page-content py-6 px-4 sm:px-6 lg:px-8 hidden">
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
                     <h2 class="text-2xl font-semibold text-gray-800">Recipes & Planner</h2>
-                    <button id="show-add-recipe-modal-btn" class="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
-                        <i data-lucide="plus"></i> Add Recipe
-                    </button>
+                    <div class="flex-shrink-0 flex gap-2">
+                        <!-- NEW: AI Import Buttons -->
+                        <button id="show-ai-suggest-modal-btn" class="inline-flex items-center gap-2 px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-violet-600 hover:bg-violet-700">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i> Suggest
+                        </button>
+                        <button id="show-ai-import-modal-btn" class="inline-flex items-center gap-2 px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                            <i data-lucide="camera" class="w-4 h-4"></i> Import
+                        </button>
+                        <button id="show-add-recipe-modal-btn" class="inline-flex items-center gap-2 px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add New
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Sub-navigation -->
@@ -206,11 +235,17 @@
                 <!-- Sub-page: Meal Planner -->
                 <div id="subpage-meal-planner" class="recipe-sub-page hidden">
                     <div class="bg-white p-4 rounded-lg shadow mb-4">
-                        <div class="flex items-center justify-between mb-3">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3">
                             <h3 class="text-lg font-semibold text-gray-800">Weekly Plan</h3>
-                            <button id="generate-shopping-list-btn" class="inline-flex items-center gap-2 px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
-                                <i data-lucide="shopping-cart" class="w-4 h-4"></i> Shopping List
-                            </button>
+                            <div class="flex-shrink-0 flex gap-2">
+                                <!-- NEW: Export to Calendar -->
+                                <button id="export-calendar-btn" class="inline-flex items-center gap-2 px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                    <i data-lucide="calendar-up" class="w-4 h-4"></i> Calendar
+                                </button>
+                                <button id="generate-shopping-list-btn" class="inline-flex items-center gap-2 px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
+                                    <i data-lucide="shopping-cart" class="w-4 h-4"></i> Shopping List
+                                </button>
+                            </div>
                         </div>
                         <!-- Week Navigation -->
                         <div class="flex items-center justify-between">
@@ -274,13 +309,12 @@
                     <button id="show-guide-btn" type="button" class="text-sm text-teal-600 font-medium inline-flex items-center gap-1 hover:text-teal-700">
                         <i data-lucide="help-circle" class="w-4 h-4"></i> How to Serve
                     </button>
-                    <button id="modal-close-btn" class="text-gray-400 hover:text-gray-600 ml-3"><i data-lucide="x"></i></button>
+                    <button id="modal-close-btn" class="modal-close-btn text-gray-400 hover:text-gray-600 ml-3"><i data-lucide="x"></i></button>
                 </div>
             </div>
             <form id="modal-form" class="p-6 space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">1. How did baby react?</label>
-                    <!-- *** EMOJIS RE-ADDED HERE *** -->
                     <div id="reaction-btn-group" class="grid grid-cols-4 gap-2">
                         <button type="button" data-value="1" class="reaction-btn text-lg p-2 border border-gray-300 rounded-lg flex flex-col items-center text-gray-600 hover:border-gray-400"><span>🤢</span><span class="text-xs mt-1">Hated it</span></button>
                         <button type="button" data-value="3" class="reaction-btn text-lg p-2 border border-gray-300 rounded-lg flex flex-col items-center text-gray-600 hover:border-gray-400"><span>🤔</span><span class="text-xs mt-1">Meh</span></button>
@@ -302,7 +336,7 @@
                 <input type="hidden" id="reaction-hidden" name="reaction">
                 <input type="hidden" id="bite-hidden" name="bite">
                 <div class="flex justify-end space-x-3 pt-4 border-t">
-                    <button type="button" id="modal-cancel-btn" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    <button type="button" id="modal-cancel-btn" class="modal-close-btn bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                         Cancel
                     </button>
                     <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
@@ -318,7 +352,7 @@
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
             <div class="flex justify-between items-center border-b p-4">
                 <h2 class="text-xl font-semibold">How to Serve: <span id="serve-guide-food-name" class="text-teal-600"></span></h2>
-                <button id="serve-guide-close-btn" class="text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
+                <button id="serve-guide-close-btn" class="modal-close-btn text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
             </div>
             <div class="p-6 modal-scroll-content prose-static">
                 <div id="serve-guide-content">
@@ -337,9 +371,19 @@
             <form id="add-recipe-form">
                 <div class="flex justify-between items-center border-b p-4">
                     <h2 class="text-xl font-semibold">Add New Recipe</h2>
-                    <button id="add-recipe-close-btn" type="button" class="text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
+                    <button id="add-recipe-close-btn" type="button" class="modal-close-btn text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
                 </div>
                 <div class="p-6 modal-scroll-content space-y-4">
+                    <!-- AI Loading State -->
+                    <div id="ai-recipe-loading" class="hidden text-center p-6">
+                        <div class="spinner mx-auto"></div>
+                        <p class="mt-4 text-sm text-gray-600">Analyzing, please wait...</p>
+                    </div>
+                    <!-- AI Error State -->
+                    <div id="ai-recipe-error" class="hidden p-4 bg-red-50 border border-red-200 rounded-md">
+                        <h3 class="text-sm font-medium text-red-800">Analysis Failed</h3>
+                        <p class="mt-2 text-sm text-red-700"></p>
+                    </div>
                     <div>
                         <label for="recipe-title" class="block text-sm font-medium text-gray-700">Recipe Title</label>
                         <input type="text" id="recipe-title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm" required>
@@ -358,9 +402,8 @@
                     </div>
                 </div>
                 <div class="flex justify-end space-x-3 p-4 border-t bg-gray-50 rounded-b-lg">
-                    <button type="button" id="add-recipe-cancel-btn" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="button" id="add-recipe-cancel-btn" class="modal-close-btn bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
                     <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700">Save Recipe</button>
-
                 </div>
             </form>
         </div>
@@ -371,7 +414,7 @@
         <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto">
             <div class="flex justify-between items-center border-b p-4">
                 <h2 id="view-recipe-title" class="text-xl font-semibold text-teal-600"></h2>
-                <button id="view-recipe-close-btn" type="button" class="text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
+                <button id="view-recipe-close-btn" type="button" class="modal-close-btn text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
             </div>
             <div class="p-6 modal-scroll-content prose-static">
                 <div id="view-recipe-tags" class="mb-4"></div>
@@ -383,12 +426,12 @@
         </div>
     </div>
     
-    <!-- *** NEW SHOPPING LIST MODAL *** -->
+    <!-- Shopping List Modal -->
     <div id="shopping-list-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[500] hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
             <div class="flex justify-between items-center border-b p-4">
                 <h2 class="text-xl font-semibold text-gray-800">Weekly Shopping List</h2>
-                <button id="shopping-list-close-btn" type="button" class="text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
+                <button id="shopping-list-close-btn" type="button" class="modal-close-btn text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
             </div>
             <div class="p-6 modal-scroll-content prose-static">
                 <p class="text-sm text-gray-600 mb-4">This is a combined list of all ingredients from your planned meals for the week.</p>
@@ -399,12 +442,12 @@
         </div>
     </div>
     
-    <!-- *** NEW VIEW PLANNED MEAL MODAL *** -->
+    <!-- View Planned Meal Modal -->
     <div id="view-planned-meal-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[500] hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-xs mx-auto">
             <div class="flex justify-between items-center border-b p-4">
                 <h2 id="view-planned-meal-title" class="text-lg font-semibold text-teal-600"></h2>
-                <button id="view-planned-meal-close-btn" type="button" class="text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
+                <button id="view-planned-meal-close-btn" type="button" class="modal-close-btn text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
             </div>
             <div class="p-4 space-y-3">
                 <button id="view-recipe-details-btn" class="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700">View Recipe</button>
@@ -431,6 +474,52 @@
             </div>
         </div>
     </div>
+    
+    <!-- NEW: AI Import Recipe Modal -->
+    <div id="ai-import-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[500] hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
+            <div class="flex justify-between items-center border-b p-4">
+                <h2 class="text-xl font-semibold text-blue-600">Import Recipe from Image</h2>
+                <button id="ai-import-close-btn" type="button" class="modal-close-btn text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-sm text-gray-600">Upload a photo of a recipe (from a cookbook or screenshot) and AI will try to extract the details.</p>
+                <input type="file" id="recipe-image-upload" accept="image/*" class="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100
+                "/>
+                <img id="image-preview" src="" alt="Image preview" class="hidden w-full h-auto max-h-48 object-contain rounded-md border"/>
+                <button id="ai-import-submit-btn" class="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50" disabled>
+                    Upload and Analyze
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- NEW: AI Suggest Recipe Modal -->
+    <div id="ai-suggest-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[500] hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
+            <div class="flex justify-between items-center border-b p-4">
+                <h2 class="text-xl font-semibold text-violet-600">Suggest a Recipe with AI</h2>
+                <button id="ai-suggest-close-btn" type="button" class="modal-close-btn text-gray-400 hover:text-gray-600"><i data-lucide="x"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-sm text-gray-600">What ingredients do you want to use?</p>
+                <input type="text" id="ai-suggest-prompt" placeholder="e.g., Chicken and broccoli" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-violet-500 focus:ring-violet-500 sm:text-sm">
+                <button id="ai-suggest-submit-btn" class="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-violet-600 hover:bg-violet-700">
+                    ✨ Generate Recipe
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 bg-red-600 text-white px-4 py-3 rounded-md shadow-lg z-[1000] hidden transition-all duration-300 transform translate-x-full">
+        <p id="toast-message"></p>
+    </div>
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -450,35 +539,39 @@
             onSnapshot,
             addDoc,
             Timestamp,
-            deleteDoc, // NEW: for removing meals
+            deleteDoc,
             setLogLevel
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- App Constants ---
         
         // =======================================================================
-        // === 1. PASTE YOUR FIREBASE CONFIG OBJECT HERE ===
+        // === 1. YOUR FIREBASE CONFIG OBJECT ===
         // =======================================================================
-        // Go to your Firebase project, add a Web App (</>), and copy the config.
         const firebaseConfig = {apiKey: "AIzaSyA3Qw1oZInrhteTAd7iOK1D2bMHMVCG4EE",
-  authDomain: "tiny-tastes-tracker.firebaseapp.com",
-  projectId: "tiny-tastes-tracker",
-  storageBucket: "tiny-tastes-tracker.firebasestorage.app",
-  messagingSenderId: "87950543929",
-  appId: "1:87950543929:web:561607c04f73369f6411e8",
-  measurementId: "G-5K38CPMFS8"}; // <-- PASTE YOUR CONFIG OBJECT HERE
+            authDomain: "tiny-tastes-tracker.firebaseapp.com",
+            projectId: "tiny-tastes-tracker",
+            storageBucket: "tiny-tastes-tracker.firebasestorage.app",
+            messagingSenderId: "87950543929",
+            appId: "1:87950543929:web:561607c04f73369f6411e8",
+            measurementId: "G-5K38CPMFS8"};
 
         // =======================================================================
-        // === 2. PASTE YOUR PROJECT ID HERE ===
+        // === 2. YOUR PROJECT ID ===
         // =======================================================================
-        // Copy the 'projectId' value from the firebaseConfig object above.
-        const appId = "tiny-tastes-tracker"; // <-- e.g., "tiny-tastes-tracker-123"
+        const appId = "tiny-tastes-tracker"; 
+        
+        // =======================================================================
+        // === 3. YOUR AI API KEY (Leave "" for user-provided key) ===
+        // =======================================================================
+        const apiKey = ""; // Leave as-is, Canvas will inject.
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         
         // =======================================================================
 
         const placeholderImgBase = "https-placehold-co-";
         
-        // *** EMOJIS RE-ADDED HERE ***
+        // *** EMOJIS FIXED ***
         const allFoods = [
             {
                 category: "Vegetables",
@@ -563,6 +656,7 @@
         const flatFoodList = allFoods.flatMap(cat => cat.items.map(item => item.name));
         const totalFoodCount = flatFoodList.length; 
 
+        // *** COMMA FIXED ***
         const foodGuideData = {
             "AVOCADO": {
                 allergyRisk: "Low",
@@ -593,7 +687,7 @@
                 chokingRisk: "High (When raw)",
                 serve6to8: "<h4 class='font-semibold'>6-8 Months:</h4><p><strong>NEVER</strong> serve raw, hard apple pieces or whole apples. They are a major choking hazard.</p><p class='mt-2'>Serve in one of two ways:<br>1. Offer unsweetened applesauce on a pre-loaded spoon.<br>2. Cook apple spears (with skin removed) by steaming or roasting them until they are very soft all the way through. They should be easily smushed between your fingers.</p>",
                 serve9to12: "<h4 class='font-semibold mt-4'>9-12 Months:</h4><p>Continue serving soft-cooked apples or applesauce. As baby develops, you can offer shredded raw apple, which is safer than chunks. Do not serve hard, raw apple chunks.</p>"
-            },
+            }, // <-- *** THIS COMMA WAS MISSING ***
             "BANANA": {
                 allergyRisk: "Low",
                 chokingRisk: "Low (when ripe)",
@@ -659,6 +753,15 @@
             '12_plus': { title: "12+ Months: Try Everything!", foods: flatFoodList, message: "By 12 months, your baby can eat most of what you eat (with appropriate modifications for salt, spice, and choking hazards). Work your way through the rest of the 100 foods list!" }
         };
 
+        // *** NEW: MEAL CADENCE GUIDE ***
+        const guidesData = [
+            { 
+                title: "How Many Meals a Day?", 
+                icon: "utensils-crossed",
+                content: `<p>Follow your baby's lead! This is a general guide, but every baby is different. Focus on exploration, not volume.</p><ul class="list-disc list-outside space-y-2 pl-5"><li><strong>~6 Months:</strong> Start with <strong>1 meal</strong> a day. This is just for practice. Timing doesn't matter, just pick a time when baby is happy, rested, and not starving.</li><li><strong>~7-8 Months:</strong> When baby seems to be getting the hang of it, you can move to <strong>2 meals</strong> a day.</li><li><strong>~9-11 Months:</strong> Baby is likely a pro by now and can handle <strong>3 meals</strong> a day, often at the same time as the family (breakfast, lunch, dinner).</li></ul><p class="mt-2"><strong>Remember:</strong> Breastmilk or formula is still their primary source of nutrition until age 1.</p>`
+            }
+        ];
+
         const researchData = [
             { 
                 title: "Original '100 Foods' Chart", 
@@ -693,18 +796,19 @@
         let currentFoodName = null;
         let triedFoodsListener = null;
         let recipesListener = null;
-        let mealPlanListener = null; // NEW: For meal plan
+        let mealPlanListener = null;
         let triedFoodsData = [];
         let recipesData = [];
-        let mealPlanData = {}; // NEW: Store as object { 'YYYY-MM-DD': { breakfast: ..., lunch: ... } }
-        let currentWeekStartDate = getStartOfWeek(new Date()); // NEW: Date object
+        let mealPlanData = {}; 
+        let currentWeekStartDate = getStartOfWeek(new Date()); 
         let babyBirthDate = null;
         let babyName = null; 
         let pediatricianApproved = false;
         let currentPage = 'tracker';
-        let currentRecipeSubPage = 'my-recipes'; // NEW
+        let currentRecipeSubPage = 'my-recipes';
         let currentFilter = 'all'; 
         let researchAccordionRendered = false;
+        let guidesAccordionRendered = false; // NEW for meal cadence guide
 
         // Modals
         const familyIdModal = document.getElementById('family-id-modal');
@@ -712,9 +816,15 @@
         const serveGuideModal = document.getElementById('how-to-serve-modal');
         const addRecipeModal = document.getElementById('add-recipe-modal');
         const viewRecipeModal = document.getElementById('view-recipe-modal');
-        const shoppingListModal = document.getElementById('shopping-list-modal'); // NEW
-        const viewPlannedMealModal = document.getElementById('view-planned-meal-modal'); // NEW
+        const shoppingListModal = document.getElementById('shopping-list-modal'); 
+        const viewPlannedMealModal = document.getElementById('view-planned-meal-modal'); 
+        const aiImportModal = document.getElementById('ai-import-modal'); // NEW
+        const aiSuggestModal = document.getElementById('ai-suggest-modal'); // NEW
 
+        // Toast
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+        
         // Family ID
         const familyIdInput = document.getElementById('family-id-input');
         const joinFamilyBtn = document.getElementById('join-family-btn');
@@ -747,6 +857,8 @@
         const addRecipeCloseBtn = document.getElementById('add-recipe-close-btn');
         const addRecipeCancelBtn = document.getElementById('add-recipe-cancel-btn');
         const addRecipeForm = document.getElementById('add-recipe-form');
+        const aiRecipeLoading = document.getElementById('ai-recipe-loading'); // NEW
+        const aiRecipeError = document.getElementById('ai-recipe-error'); // NEW
         
         // View Recipe Modal
         const viewRecipeCloseBtn = document.getElementById('view-recipe-close-btn');
@@ -755,19 +867,31 @@
         const viewRecipeIngredients = document.getElementById('view-recipe-ingredients');
         const viewRecipeInstructions = document.getElementById('view-recipe-instructions');
         
-        // NEW: Meal Planner Elements
+        // Meal Planner Elements
         const calendarGrid = document.getElementById('calendar-grid');
         const weekNavDisplay = document.getElementById('week-nav-display');
         const prevWeekBtn = document.getElementById('prev-week-btn');
         const nextWeekBtn = document.getElementById('next-week-btn');
         const todayBtn = document.getElementById('today-btn');
         const generateShoppingListBtn = document.getElementById('generate-shopping-list-btn');
+        const exportCalendarBtn = document.getElementById('export-calendar-btn'); // NEW
         const shoppingListContent = document.getElementById('shopping-list-content');
         const shoppingListCloseBtn = document.getElementById('shopping-list-close-btn');
         const viewPlannedMealTitle = document.getElementById('view-planned-meal-title');
         const viewRecipeDetailsBtn = document.getElementById('view-recipe-details-btn');
         const removePlannedMealBtn = document.getElementById('remove-planned-meal-btn');
         const viewPlannedMealCloseBtn = document.getElementById('view-planned-meal-close-btn');
+        
+        // AI Modals
+        const showAiImportModalBtn = document.getElementById('show-ai-import-modal-btn');
+        const aiImportCloseBtn = document.getElementById('ai-import-close-btn');
+        const recipeImageUpload = document.getElementById('recipe-image-upload');
+        const imagePreview = document.getElementById('image-preview');
+        const aiImportSubmitBtn = document.getElementById('ai-import-submit-btn');
+        const showAiSuggestModalBtn = document.getElementById('show-ai-suggest-modal-btn');
+        const aiSuggestCloseBtn = document.getElementById('ai-suggest-close-btn');
+        const aiSuggestPrompt = document.getElementById('ai-suggest-prompt');
+        const aiSuggestSubmitBtn = document.getElementById('ai-suggest-submit-btn');
 
         // Page Elements
         const foodGridContainer = document.getElementById('food-grid-container');
@@ -782,12 +906,27 @@
         const profileDisplay = document.getElementById('profile-display');
         const ageDisplayContainer = document.getElementById('age-display-container');
         const ageDisplay = document.getElementById('age-display');
+        const guidesAccordionContainer = document.getElementById('guides-accordion-container'); // NEW
         const recommendationsContainer = document.getElementById('recommendations-container');
         const researchAccordionContainer = document.getElementById('research-accordion-container');
         const progressText = document.getElementById('progress-text');
         const progressBar = document.getElementById('progress-bar');
         const navButtons = document.querySelectorAll('.nav-btn');
         const pages = document.querySelectorAll('.page-content');
+
+        // --- Util Functions ---
+        function showToast(message, isError = true) {
+            toastMessage.textContent = message;
+            toast.classList.toggle('bg-red-600', isError);
+            toast.classList.toggle('bg-green-600', !isError);
+            toast.classList.remove('hidden', 'translate-x-full');
+            toast.classList.add('translate-x-0');
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                toast.classList.remove('translate-x-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
 
         // --- Date Helpers ---
         function getStartOfWeek(date) {
@@ -807,8 +946,25 @@
             const options = { month: 'short', day: 'numeric' };
             return `${startDate.toLocaleDateString(undefined, options)} - ${endDate.toLocaleDateString(undefined, options)}`;
         }
+        
+        function formatICSDate(date, meal) {
+            // YYYYMMDDTHHMMSS
+            const d = new Date(date);
+            let h = 8, m = 0; // Breakfast
+            if (meal === 'lunch') h = 12;
+            if (meal === 'dinner') h = 17;
+            d.setHours(h, m, 0);
+            
+            return d.getUTCFullYear() +
+                ('0' + (d.getUTCMonth() + 1)).slice(-2) +
+                ('0' + d.getUTCDate()).slice(-2) +
+                'T' +
+                ('0' + d.getUTCHours()).slice(-2) +
+                ('0' + d.getUTCMinutes()).slice(-2) +
+                ('0' + d.getUTCSeconds()).slice(-2) +
+                'Z';
+        }
 
-        // (renderFoodGrid, createFoodCard, renderSummaryList are unchanged)
         function renderFoodGrid() {
             foodGridContainer.innerHTML = '';
             const triedFoodSet = new Set(triedFoodsData.map(doc => doc.id));
@@ -881,33 +1037,25 @@
             }).join('');
         }
         
-        // --- RECIPE FUNCTIONS ---
-        
         function formatRecipeText(text) {
             if (!text) return '';
-            const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-            let html = '';
-            let inList = false;
-            for (const line of lines) {
-                if (line.startsWith('-') || line.startsWith('*') || /^\d+\./.test(line)) {
-                    if (!inList) {
-                        html += '<ul>';
-                        inList = true;
+            // Basic markdown-like list formatting
+            return text.split('\n').map(line => line.trim())
+                .filter(line => line.length > 0)
+                .map(line => {
+                    if (line.startsWith('-') || line.startsWith('*')) {
+                        return `<ul><li class="ml-4">${line.substring(1).trim()}</li></ul>`;
                     }
-                    html += `<li>${line.replace(/^[\*-\s]|^(\d+\.\s)/, '')}</li>`;
-                } else {
-                    if (inList) {
-                        html += '</ul>';
-                        inList = false;
+                    if (/^\d+\./.test(line)) {
+                        return `<ol><li class="ml-4">${line.replace(/^\d+\./, '').trim()}</li></ol>`;
                     }
-                    html += `<p>${line}</p>`;
-                }
-            }
-            if (inList) html += '</ul>';
-            return html;
+                    return `<p>${line}</p>`;
+                })
+                .join('')
+                 // Super basic list collapsing
+                .replace(/<\/ul><ul>/g, '')
+                .replace(/<\/ol><ol>/g, '');
         }
-
-        // --- NEW/MODIFIED RECIPE FUNCTIONS ---
         
         function renderRecipeList() {
             if (recipesData.length === 0) {
@@ -924,6 +1072,7 @@
                     ? recipe.tags.map(tag => `<span class="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">${tag}</span>`).join(' ')
                     : '';
                 
+                // Make card draggable
                 return `
                 <div data-recipe-id="${recipeId}" data-recipe-title="${recipe.title}" draggable="true" class="recipe-card-draggable w-full text-left bg-white shadow rounded-lg p-4 transition-all hover:shadow-md">
                     <h3 class="text-lg font-semibold text-teal-700 pointer-events-none">${recipe.title}</h3>
@@ -943,7 +1092,6 @@
             recipesListener = onSnapshot(recipesRef, (snapshot) => {
                 console.log(`Received recipe snapshot with ${snapshot.docs.length} docs.`);
                 recipesData = snapshot.docs;
-                // Only render if the page is active
                 if (currentPage === 'recipes' && currentRecipeSubPage === 'my-recipes') {
                     renderRecipeList();
                 }
@@ -993,8 +1141,6 @@
             viewRecipeModal.classList.remove('hidden');
         }
         
-        // --- NEW MEAL PLANNER FUNCTIONS ---
-
         function initializeRecipePageTabs() {
             recipeSubNav.addEventListener('click', (e) => {
                 const btn = e.target.closest('.recipe-sub-nav-btn');
@@ -1002,15 +1148,12 @@
                 
                 currentRecipeSubPage = btn.dataset.subpage;
                 
-                // Update button styles
                 recipeSubNav.querySelectorAll('.recipe-sub-nav-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 
-                // Show/hide sub-pages
                 recipeSubPages.forEach(p => p.classList.add('hidden'));
                 document.getElementById(`subpage-${currentRecipeSubPage}`).classList.remove('hidden');
                 
-                // Render content for the activated page
                 if (currentRecipeSubPage === 'my-recipes') {
                     renderRecipeList();
                 } else if (currentRecipeSubPage === 'meal-planner') {
@@ -1021,7 +1164,7 @@
         
         function renderMealPlanner() {
             weekNavDisplay.textContent = getWeekDisplay(currentWeekStartDate);
-            calendarGrid.innerHTML = ''; // Clear existing
+            calendarGrid.innerHTML = ''; 
             
             for (let i = 0; i < 7; i++) {
                 const dayDate = new Date(currentWeekStartDate);
@@ -1078,7 +1221,7 @@
         }
         
         function handleDragOver(e) {
-            e.preventDefault(); // Necessary to allow drop
+            e.preventDefault(); 
             const slot = e.target.closest('.meal-slot');
             if (slot) {
                 slot.classList.add('drag-over');
@@ -1124,11 +1267,7 @@
         async function removeMealPlan(date, meal) {
             if (!db || !sharedFamilyId) return;
             const docPath = `/artifacts/${appId}/users/${sharedFamilyId}/mealPlan/${date}`;
-            const mealData = { [meal]: null }; // Set to null to remove
             try {
-                // We use setDoc with merge to "delete" just that field
-                // A better way would be FieldValue.delete() but this is simpler
-                // Let's load the doc, remove the key, and save it back
                 const docRef = doc(db, docPath);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
@@ -1171,7 +1310,7 @@
         function parseIngredients(text) {
             if (!text) return [];
             return text.split('\n')
-                .map(line => line.trim())
+                .map(line => line.trim().replace(/^[\*-\s]|^(\d+\.\s)/, '')) // clean up bullets/numbers
                 .filter(line => line.length > 0);
         }
         
@@ -1209,15 +1348,209 @@
             if (allIngredients.size === 0) {
                 shoppingListContent.innerHTML = '<p>No meals planned for this week.</p>';
             } else {
-                shoppingListContent.innerHTML = `<ul>${[...allIngredients].map(item => `<li>${item}</li>`).join('')}</ul>`;
+                shoppingListContent.innerHTML = `<ul class="list-disc list-outside pl-5 space-y-1">${[...allIngredients].map(item => `<li>${item}</li>`).join('')}</ul>`;
             }
             shoppingListModal.classList.remove('hidden');
         }
+        
+        function exportToCalendar() {
+            if (typeof ICAL === 'undefined') {
+                showToast("Calendar library not loaded. Please try again.");
+                return;
+            }
+            
+            let vCalendar = new ICAL.Component('vcalendar');
+            vCalendar.addPropertyWithValue('prodid', '-//Tiny Tastes Tracker//EN');
+            vCalendar.addPropertyWithValue('version', '2.0');
+            
+            let eventsAdded = 0;
+            const weekDates = [];
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date(currentWeekStartDate);
+                dayDate.setDate(currentWeekStartDate.getDate() + i);
+                weekDates.push(formatDateString(dayDate));
+            }
 
-        // --- END MEAL PLANNER FUNCTIONS ---
+            for (const date of weekDates) {
+                const dayPlan = mealPlanData[date];
+                if (dayPlan) {
+                    for (const meal of ['breakfast', 'lunch', 'dinner']) {
+                        if (dayPlan[meal]) {
+                            const recipeId = dayPlan[meal].id;
+                            const recipeTitle = dayPlan[meal].title;
+                            const recipeDoc = recipesData.find(doc => doc.id === recipeId);
+                            
+                            let description = `Recipe for ${recipeTitle}.`;
+                            if (recipeDoc) {
+                                description += `\n\nIngredients:\n${recipeDoc.data().ingredients}\n\nInstructions:\n${recipeDoc.data().instructions}`;
+                            }
+                            
+                            let vEvent = new ICAL.Component('vevent');
+                            let event = new ICAL.Event(vEvent);
+                            
+                            event.summary = `${babyName ? babyName + "'s " : ''}${meal.charAt(0).toUpperCase() + meal.slice(1)}: ${recipeTitle}`;
+                            event.description = description;
+                            event.dtstart = ICAL.Time.fromJSDate(new Date(formatICSDate(date, meal)));
+                            event.dtend = ICAL.Time.fromJSDate(new Date(event.dtstart.toJSDate().getTime() + 60 * 60 * 1000)); // 1 hour
+                            
+                            vCalendar.addSubcomponent(vEvent);
+                            eventsAdded++;
+                        }
+                    }
+                }
+            }
+            
+            if (eventsAdded === 0) {
+                showToast("No meals planned for this week to export.", false);
+                return;
+            }
+            
+            const calendarData = vCalendar.toString();
+            const blob = new Blob([calendarData], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'TinyTastes_MealPlan.ics';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
 
+        // --- AI Helper Functions ---
 
-        // (listenToTriedFoods is unchanged)
+        // Converts image file to base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
+        }
+        
+        // Fills the "Add Recipe" modal with AI-parsed data
+        function fillRecipeFormWithAI(recipeData) {
+            document.getElementById('recipe-title').value = recipeData.title || '';
+            document.getElementById('recipe-ingredients').value = recipeData.ingredients || '';
+            document.getElementById('recipe-instructions').value = recipeData.instructions || '';
+        }
+        
+        // Shows AI loading state in "Add Recipe" modal
+        function showAILoading(isLoading, error = null) {
+            if (isLoading) {
+                aiRecipeLoading.classList.remove('hidden');
+                aiRecipeError.classList.add('hidden');
+            } else {
+                aiRecipeLoading.classList.add('hidden');
+                if (error) {
+                    aiRecipeError.querySelector('p').textContent = error;
+                    aiRecipeError.classList.remove('hidden');
+                } else {
+                    aiRecipeError.classList.add('hidden');
+                }
+            }
+        }
+        
+        // Handles "Import from Image"
+        async function handleImageImport(file) {
+            if (!file) return;
+            aiImportModal.classList.add('hidden');
+            addRecipeModal.classList.remove('hidden');
+            showAILoading(true);
+            
+            try {
+                const base64Data = await fileToBase64(file);
+                const payload = {
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [
+                                { text: "You are a recipe parser. Extract the title, ingredients (as a bulleted list), and instructions (as a numbered list) from this image. Respond ONLY with a JSON object in the format {\"title\": \"...\", \"ingredients\": \"...\", \"instructions\": \"...\"}. If you cannot find one of the fields, return an empty string for it." },
+                                {
+                                    inlineData: {
+                                        mimeType: file.type,
+                                        data: base64Data
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (text) {
+                    const parsed = JSON.parse(text);
+                    fillRecipeFormWithAI(parsed);
+                    showAILoading(false);
+                } else {
+                    throw new Error("AI gave an empty response.");
+                }
+            } catch (err) {
+                console.error("Error during AI Image Import: ", err);
+                showAILoading(false, `Failed to parse recipe. ${err.message}`);
+            }
+        }
+        
+        // Handles "Suggest with AI"
+        async function handleAISuggest(prompt) {
+            if (!prompt) return;
+            aiSuggestModal.classList.add('hidden');
+            addRecipeModal.classList.remove('hidden');
+            showAILoading(true);
+            
+            try {
+                const fullPrompt = `You are a baby-led weaning recipe creator. A parent wants a recipe using the following ingredients: "${prompt}". 
+                Create a simple recipe appropriate for a baby 6-12 months old. 
+                Respond ONLY with a JSON object in the format {"title": "...", "ingredients": "...", "instructions": "..."}.
+                Make sure ingredients are a bulleted list and instructions are a numbered list.`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: fullPrompt }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (text) {
+                    const parsed = JSON.parse(text);
+                    fillRecipeFormWithAI(parsed);
+                    showAILoading(false);
+                } else {
+                    throw new Error("AI gave an empty response.");
+                }
+            } catch (err) {
+                console.error("Error during AI Suggest: ", err);
+                showAILoading(false, `Failed to generate recipe. ${err.message}`);
+            }
+        }
+
         function listenToTriedFoods() {
             if (!db || !sharedFamilyId) return; 
             if (triedFoodsListener) triedFoodsListener();
@@ -1236,7 +1569,6 @@
             }, (error) => console.error("Error listening to tried foods: ", error));
         }
 
-        // (updateFoodGridUI is unchanged)
         function updateFoodGridUI(triedDocs) {
              const triedSet = new Set(triedDocs.map(doc => doc.id));
              document.querySelectorAll('#food-grid-container .food-card').forEach(card => {
@@ -1245,7 +1577,6 @@
             lucide.createIcons();
         }
 
-        // (openModal is unchanged)
         async function openModal(foodName) {
             currentFoodName = foodName;
             const food = allFoods.flatMap(c => c.items).find(f => f.name === foodName);
@@ -1284,7 +1615,6 @@
             lucide.createIcons();
         }
 
-        // (closeModal is unchanged)
         function closeModal() {
             modal.classList.add('hidden');
             currentFoodName = null;
@@ -1294,7 +1624,6 @@
             document.querySelectorAll('.reaction-btn, .bite-btn').forEach(btn => btn.classList.remove('modal-btn-selected'));
         }
 
-        // (handleFormSubmit is unchanged)
         async function handleFormSubmit(e) {
             e.preventDefault();
             if (!db || !sharedFamilyId || !currentFoodName) return; 
@@ -1312,7 +1641,6 @@
             } catch (error) { console.error("Error saving document: ", error); }
         }
 
-        // *** MODIFIED switchPage ***
         function switchPage(pageId) {
             currentPage = pageId;
             pages.forEach(page => page.classList.add('hidden'));
@@ -1329,27 +1657,23 @@
                 btn.classList.toggle('hover:text-gray-700', !isCurrent);
             });
             
-            // Render content based on the new page
             if (currentPage === 'log') renderSummaryList(triedFoodsData);
-            else if (currentPage === 'ideas') displayRecommendations();
+            else if (currentPage === 'ideas') {
+                if (!guidesAccordionRendered) renderGuidesAccordion();
+                displayRecommendations();
+            }
             else if (currentPage === 'learn' && !researchAccordionRendered) {
                 renderResearchAccordion();
                 researchAccordionRendered = true;
             } else if (currentPage === 'tracker') renderFoodGrid();
             else if (currentPage === 'recipes') {
-                // Check which sub-page is active
-                if (currentRecipeSubPage === 'my-recipes') {
-                    renderRecipeList();
-                } else if (currentRecipeSubPage === 'meal-planner') {
-                    renderMealPlanner();
-                }
+                if (currentRecipeSubPage === 'my-recipes') renderRecipeList();
+                else if (currentRecipeSubPage === 'meal-planner') renderMealPlanner();
             }
             
             lucide.createIcons();
         }
 
-        // (showHowToServeGuide, closeServeGuideModal, exportToCSV, exportToPDF, createAccordionItem, renderResearchAccordion, calculateAge, displayRecommendations, loadUserProfile, saveBabyProfile, savePediatricianApproval are unchanged)
-        // ...
         function showHowToServeGuide(foodName) {
             const food = allFoods.flatMap(c => c.items).find(f => f.name === foodName);
             serveGuideFoodName.textContent = `${food ? food.emoji : ''} ${foodName}`;
@@ -1359,9 +1683,16 @@
                 let riskHtml = '';
                 if (guide.allergyRisk.toLowerCase().includes('high')) {
                     riskHtml += `<p class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md"><strong>Allergy Risk: ${guide.allergyRisk}</strong></p>`;
+                } else {
+                     riskHtml += `<p class="mb-4 p-3 bg-green-50 border border-green-200 rounded-md"><strong>Allergy Risk: ${guide.allergyRisk}</strong></p>`;
                 }
+                
                 if (guide.chokingRisk.toLowerCase().includes('high')) {
                     riskHtml += `<p class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md"><strong>Choking Risk: ${guide.chokingRisk}</strong></p>`;
+                } else if (guide.chokingRisk.toLowerCase().includes('medium')) {
+                    riskHtml += `<p class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md"><strong>Choking Risk: ${guide.chokingRisk}</strong></p>`;
+                } else {
+                    riskHtml += `<p class="mb-4 p-3 bg-green-50 border border-green-200 rounded-md"><strong>Choking Risk: ${guide.chokingRisk}</strong></p>`;
                 }
                 
                 serveGuideContent.innerHTML = `
@@ -1381,23 +1712,24 @@
             serveGuideModal.classList.add('hidden');
         }
         
-        function exportToCSV() {
+        // *** PDF EXPORT FIX *** --- This is a duplicate, commenting it out. ---
+        /* function exportToPDF() {
             if (triedFoodsData.length === 0) return;
-            let csvContent = "data:text/csv;charset=utf-8,Food Name,Date,Reaction (1-7),More than 1 Bite?\n";
-            triedFoodsData.forEach(doc => {
-                const data = doc.data();
-                csvContent += [ doc.id, data.date, data.reaction, data.moreThanOneBite ? "Yes" : "No" ].join(",") + "\n";
-            });
-            const link = document.createElement("a");
-            link.setAttribute("href", encodeURI(csvContent));
-            link.setAttribute("download", "tiny_tastes_summary.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
 
-        function exportToPDF() {
-            if (triedFoodsData.length === 0) return;
+            if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+                console.error("jsPDF library is not loaded.");
+                showToast("Error: PDF library not loaded. Please refresh.");
+                return;
+            }
+            
+            const autoTable = window.jspdf.autoTable;
+
+            if (typeof autoTable !== 'function') {
+                 console.error("jsPDF-AutoTable plugin is not loaded correctly.");
+                 showToast("Error: PDF Table plugin not loaded.");
+                 return;
+            }
+
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
@@ -1406,11 +1738,17 @@
                     const data = doc.data();
                     return [ doc.id, data.date, data.reaction, data.moreThanOneBite ? "Yes" : "No" ];
                 });
-                doc.autoTable({ head: [tableColumns], body: tableRows, startY: 20 });
+
+                // Use autoTable(doc, options) instead of doc.autoTable(options)
+                autoTable(doc, { head: [tableColumns], body: tableRows, startY: 20 });
+                
                 doc.text("Tiny Tastes Tracker Summary", 14, 15);
                 doc.save("tiny_tastes_summary.pdf");
-            } catch (error) { console.error("Error exporting PDF: ", error); }
-        }
+            } catch (error) { 
+                console.error("Error exporting PDF: ", error);
+                showToast(`Error exporting PDF: ${error.message}`);
+            }
+        } */
 
         function createAccordionItem(id, title, icon, content, isOpen = false) {
             const item = document.createElement('div');
@@ -1429,6 +1767,17 @@
             researchData.forEach((item, index) => {
                 researchAccordionContainer.appendChild(createAccordionItem(`research-${index}`, item.title, item.icon, item.content, index === 0));
             });
+            researchAccordionRendered = true;
+            lucide.createIcons();
+        }
+        
+        // NEW: Render Meal Cadence Guide
+        function renderGuidesAccordion() {
+            guidesAccordionContainer.innerHTML = '';
+            guidesData.forEach((item, index) => {
+                guidesAccordionContainer.appendChild(createAccordionItem(`guide-${index}`, item.title, item.icon, item.content, true));
+            });
+            guidesAccordionRendered = true;
             lucide.createIcons();
         }
 
@@ -1567,11 +1916,10 @@
                 sharedFamilyId = storedFamilyId;
                 console.log(`Found Family ID: ${sharedFamilyId}`);
                 familyIdModal.classList.add('hidden');
-                // Load ALL data for this family
                 loadUserProfile();
                 listenToTriedFoods();
                 listenToRecipes();
-                listenToMealPlan(); // NEW
+                listenToMealPlan();
             } else {
                 console.log("No Family ID found. Showing login modal.");
                 familyIdModal.classList.remove('hidden');
@@ -1592,11 +1940,11 @@
             localStorage.removeItem('familyId');
             if (triedFoodsListener) triedFoodsListener(); 
             if (recipesListener) recipesListener();
-            if (mealPlanListener) mealPlanListener(); // NEW
+            if (mealPlanListener) mealPlanListener();
             
             triedFoodsData = [];
             recipesData = [];
-            mealPlanData = {}; // NEW
+            mealPlanData = {};
             babyBirthDate = null;
             babyName = null;
             pediatricianApproved = false;
@@ -1639,7 +1987,7 @@
                         sharedFamilyId = null;
                         if (triedFoodsListener) triedFoodsListener(); 
                         if (recipesListener) recipesListener();
-                        if (mealPlanListener) mealPlanListener(); // NEW
+                        if (mealPlanListener) mealPlanListener();
                         try {
                             await signInAnonymously(auth);
                         } catch (error) {
@@ -1660,24 +2008,22 @@
         logOutBtn.addEventListener('click', handleLogOut);
         
         // Food Log Modal
-        modalCloseBtn.addEventListener('click', closeModal);
-        modalCancelBtn.addEventListener('click', closeModal);
         modalForm.addEventListener('submit', handleFormSubmit);
         
         // "How to Serve" Modal
         showGuideBtn.addEventListener('click', () => showHowToServeGuide(showGuideBtn.dataset.foodName));
-        serveGuideCloseBtn.addEventListener('click', closeServeGuideModal);
         
         // Recipe Modals
-        showAddRecipeModalBtn.addEventListener('click', () => addRecipeModal.classList.remove('hidden'));
-        addRecipeCloseBtn.addEventListener('click', () => addRecipeModal.classList.add('hidden'));
-        addRecipeCancelBtn.addEventListener('click', () => addRecipeModal.classList.add('hidden'));
+        showAddRecipeModalBtn.addEventListener('click', () => {
+            addRecipeForm.reset();
+            showAILoading(false);
+            addRecipeModal.classList.remove('hidden');
+        });
         addRecipeForm.addEventListener('submit', handleAddRecipe);
-        viewRecipeCloseBtn.addEventListener('click', () => viewRecipeModal.classList.add('hidden'));
         
         // View Recipe from Recipe List
         recipeListContainer.addEventListener('click', (e) => {
-            const btn = e.target.closest('.recipe-card-draggable'); // Click on card
+            const btn = e.target.closest('.recipe-card-draggable');
             if(btn) openViewRecipeModal(btn.dataset.recipeId);
         });
         
@@ -1687,12 +2033,42 @@
             viewPlannedMealModal.classList.add('hidden');
         });
         
-        // --- NEW MEAL PLANNER LISTENERS ---
+        // --- AI MODAL LISTENERS ---
+        showAiImportModalBtn.addEventListener('click', () => {
+            imagePreview.classList.add('hidden');
+            recipeImageUpload.value = null;
+            aiImportSubmitBtn.disabled = true;
+            aiImportModal.classList.remove('hidden');
+        });
         
-        // Recipe Sub-tab navigation
+        recipeImageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                imagePreview.src = URL.createObjectURL(file);
+                imagePreview.classList.remove('hidden');
+                aiImportSubmitBtn.disabled = false;
+            } else {
+                imagePreview.classList.add('hidden');
+                aiImportSubmitBtn.disabled = true;
+            }
+        });
+        
+        aiImportSubmitBtn.addEventListener('click', () => {
+            const file = recipeImageUpload.files[0];
+            if (file) handleImageImport(file);
+        });
+        
+        showAiSuggestModalBtn.addEventListener('click', () => {
+            aiSuggestPrompt.value = '';
+            aiSuggestModal.classList.remove('hidden');
+        });
+        
+        aiSuggestSubmitBtn.addEventListener('click', () => {
+            handleAISuggest(aiSuggestPrompt.value);
+        });
+        
+        // --- MEAL PLANNER LISTENERS ---
         initializeRecipePageTabs();
-        
-        // Week Navigation
         prevWeekBtn.addEventListener('click', () => {
             currentWeekStartDate.setDate(currentWeekStartDate.getDate() - 7);
             renderMealPlanner();
@@ -1706,14 +2082,11 @@
             renderMealPlanner();
         });
         
-        // Drag/Drop Listeners
         recipeListContainer.addEventListener('dragstart', handleDragStart);
         calendarGrid.addEventListener('dragover', handleDragOver);
         calendarGrid.addEventListener('dragleave', handleDragLeave);
         calendarGrid.addEventListener('drop', handleDrop);
-
         
-        // Click on a planned meal
         calendarGrid.addEventListener('click', (e) => {
             const item = e.target.closest('.planned-meal-item');
             if (item) {
@@ -1721,19 +2094,14 @@
             }
         });
         
-        // Remove planned meal
         removePlannedMealBtn.addEventListener('click', async (e) => {
             const { date, meal } = e.target.dataset;
             await removeMealPlan(date, meal);
             viewPlannedMealModal.classList.add('hidden');
         });
-        viewPlannedMealCloseBtn.addEventListener('click', () => viewPlannedMealModal.classList.add('hidden'));
         
-        // Shopping List
         generateShoppingListBtn.addEventListener('click', generateShoppingList);
-        shoppingListCloseBtn.addEventListener('click', () => shoppingListModal.classList.add('hidden'));
-
-        // --- END NEW MEAL PLANNER LISTENERS ---
+        exportCalendarBtn.addEventListener('click', exportToCalendar);
 
         // Reaction/Bite Buttons
         reactionBtnGroup.addEventListener('click', (e) => {
@@ -1761,8 +2129,29 @@
             if (card && card.dataset.foodName) openModal(card.dataset.foodName);
         });
         
+        // --- IOS PWA / MODAL FIXES ---
+        // Add touchstart listeners for all modal close buttons
+        document.querySelectorAll('.modal-close-btn').forEach(btn => {
+            btn.addEventListener('click', () => btn.closest('.fixed').classList.add('hidden'));
+            btn.addEventListener('touchstart', () => btn.closest('.fixed').classList.add('hidden'));
+        });
+        
+        // Special listeners for log modal cancel/close
+        modalCloseBtn.addEventListener('click', closeModal);
+        modalCancelBtn.addEventListener('click', closeModal);
+        modalCloseBtn.addEventListener('touchstart', closeModal);
+        modalCancelBtn.addEventListener('touchstart', closeModal);
+        
         // Nav & Accordions
-        navButtons.forEach(btn => btn.addEventListener('click', () => switchPage(btn.dataset.page)));
+        navButtons.forEach(btn => {
+            const pageId = btn.dataset.page;
+            btn.addEventListener('click', () => switchPage(pageId));
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // prevent "ghost click"
+                switchPage(pageId);
+            });
+        });
+        
         document.body.addEventListener('click', (e) => {
             const toggle = e.target.closest('.accordion-toggle');
             if (toggle) toggle.closest('.accordion-item').classList.toggle('is-open');
@@ -1783,12 +2172,99 @@
         });
         
         // Exports & Profile
-        exportCsvBtn.addEventListener('click', exportToCSV);
-        exportPdfBtn.addEventListener('click', exportToPDF);
-        saveProfileBtn.addEventListener('click', saveBabyProfile);
-        recommendationsContainer.addEventListener('click', (e) => {
-            if (e.target.id === 'approve-early-start-btn') savePediatricianApproval(true);
-        });
+        
+        // --- ADDED EXPORT TO CSV FUNCTION ---
+        function exportToCSV() {
+            if (triedFoodsData.length === 0) {
+                showToast("No data to export.", true);
+                return;
+            }
+
+            // Define headers
+            const headers = ['Food Name', 'Date', 'Reaction (1-7)', 'More than 1 Bite?'];
+            
+            // Map data to CSV rows
+            const rows = triedFoodsData.map(doc => {
+                const data = doc.data();
+                const foodName = doc.id;
+                // Handle quotes in food name just in case
+                const safeFoodName = `"${foodName.replace(/"/g, '""')}"`;
+                return [
+                    safeFoodName,
+                    data.date,
+                    data.reaction,
+                    data.moreThanOneBite ? "Yes" : "No"
+                ].join(',');
+            });
+
+            // Add header row
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += headers.join(',') + "\r\n";
+            csvContent += rows.join("\r\n");
+
+            // Create and trigger download link
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "tiny_tastes_summary.csv");
+            document.body.appendChild(link); // Required for Firefox
+
+            link.click(); // Trigger download
+            document.body.removeChild(link); // Clean up
+        }
+        
+        // *** PDF EXPORT FIX ***
+        function exportToPDF() {
+            if (triedFoodsData.length === 0) {
+                showToast("No data to export.", true);
+                return;
+            }
+
+            if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+                console.error("jsPDF library is not loaded.");
+                showToast("Error: PDF library not loaded. Please refresh.");
+                return;
+            }
+            
+            const autoTable = window.jspdf.autoTable;
+
+            if (typeof autoTable !== 'function') {
+                 console.error("jsPDF-AutoTable plugin is not loaded correctly.");
+                 showToast("Error: PDF Table plugin not loaded.");
+                 return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const tableColumns = ["Food Name", "Date", "Reaction (1-7)", "More than 1 Bite?"];
+                const tableRows = triedFoodsData.map(doc => {
+                    const data = doc.data();
+                    return [ doc.id, data.date, data.reaction, data.moreThanOneBite ? "Yes" : "No" ];
+                });
+                
+                // Add baby's name if available
+                const title = babyName ? `${babyName}'s Tiny Tastes Summary` : "Tiny Tastes Tracker Summary";
+
+                // Use autoTable(doc, options) instead of doc.autoTable(options)
+                autoTable(doc, { 
+                    head: [tableColumns], 
+                    body: tableRows, 
+                    startY: 20,
+                    didDrawPage: function(data) {
+                        // Header
+                        doc.setFontSize(16);
+                        doc.setTextColor(40);
+                        doc.text(title, data.settings.margin.left, 15);
+                    }
+                });
+                
+                doc.save("tiny_tastes_summary.pdf");
+            } catch (error) { 
+                console.error("Error exporting PDF: ", error);
+                showToast(`Error exporting PDF: ${error.message}`);
+            }
+        }
 
         // --- App Initialization ---
         switchPage('tracker');
