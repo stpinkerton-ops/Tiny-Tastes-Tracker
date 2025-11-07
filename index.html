@@ -280,6 +280,7 @@
             <form id="modal-form" class="p-6 space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">1. How did baby react?</label>
+                    <!-- *** EMOJIS RE-ADDED HERE *** -->
                     <div id="reaction-btn-group" class="grid grid-cols-4 gap-2">
                         <button type="button" data-value="1" class="reaction-btn text-lg p-2 border border-gray-300 rounded-lg flex flex-col items-center text-gray-600 hover:border-gray-400"><span>🤢</span><span class="text-xs mt-1">Hated it</span></button>
                         <button type="button" data-value="3" class="reaction-btn text-lg p-2 border border-gray-300 rounded-lg flex flex-col items-center text-gray-600 hover:border-gray-400"><span>🤔</span><span class="text-xs mt-1">Meh</span></button>
@@ -359,6 +360,7 @@
                 <div class="flex justify-end space-x-3 p-4 border-t bg-gray-50 rounded-b-lg">
                     <button type="button" id="add-recipe-cancel-btn" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
                     <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700">Save Recipe</button>
+
                 </div>
             </form>
         </div>
@@ -476,6 +478,7 @@
 
         const placeholderImgBase = "https-placehold-co-";
         
+        // *** EMOJIS RE-ADDED HERE ***
         const allFoods = [
             {
                 category: "Vegetables",
@@ -647,14 +650,7 @@
             }
         };
 
-        const recommendationData = {
-[Immersive content redacted for brevity.]
-        };
-
-        const recommendationData = {
-[Immersive content redacted for brevity.]
-        };
-
+        // *** FIX: REMOVED DUPLICATE recommendationData OBJECTS ***
         const recommendationData = {
             'too_young': { title: "Not Quite 6 Months", foods: [], message: "Most pediatricians recommend starting solids around 6 months, when baby shows all signs of readiness. See the 'Learn' tab for more info!" },
             '6_months': { title: "6 Months: First Tastes", foods: ["AVOCADO", "SWEET POTATO", "BANANA", "OATMEAL", "EGGPLANT", "ZUCCHINI", "BROCCOLI", "CARROTS", "EGGS", "YOGURT", "WATER"], message: "Focus on soft, single-ingredient foods. Offer soft-cooked spears or large pieces. This is a great time to safely introduce top allergens like egg and yogurt (see Learn tab!). Offer sips of water with meals." },
@@ -1715,6 +1711,7 @@
         calendarGrid.addEventListener('dragover', handleDragOver);
         calendarGrid.addEventListener('dragleave', handleDragLeave);
         calendarGrid.addEventListener('drop', handleDrop);
+
         
         // Click on a planned meal
         calendarGrid.addEventListener('click', (e) => {
