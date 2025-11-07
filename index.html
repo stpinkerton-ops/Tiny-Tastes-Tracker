@@ -163,6 +163,7 @@
             <form id="modal-form" class="p-6 space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">1. How did baby react?</label>
+                    <!-- *** EMOJIS RE-ADDED HERE *** -->
                     <div id="reaction-btn-group" class="grid grid-cols-4 gap-2">
                         <button type="button" data-value="1" class="reaction-btn text-lg p-2 border border-gray-300 rounded-lg flex flex-col items-center text-gray-600 hover:border-gray-400"><span>🤢</span><span class="text-xs mt-1">Hated it</span></button>
                         <button type="button" data-value="3" class="reaction-btn text-lg p-2 border border-gray-300 rounded-lg flex flex-col items-center text-gray-600 hover:border-gray-400"><span>🤔</span><span class="text-xs mt-1">Meh</span></button>
@@ -218,41 +219,28 @@
         // --- App Constants ---
 
         // =======================================================================
-        // === 1. PASTE YOUR FIREBASE CONFIG OBJECT HERE ===
+        // === 1. YOUR FIREBASE CONFIG OBJECT ===
         // =======================================================================
-        // Go to your Firebase project, add a Web App (</>), and copy the config.
-        // It will look like:
-        // const firebaseConfig = {
-        //   apiKey: "AIzaSy...",
-        //   authDomain: "your-project-name.firebaseapp.com",
-        //   projectId: "your-project-name",
-        //   storageBucket: "your-project-name.appspot.com",
-        //   messagingSenderId: "...",
-        //   appId: "..."
-        // };
-        //
-        // REPLACE THE LINE BELOW WITH THE OBJECT FROM YOUR FIREBASW PROJECT:
+        // This is your config. It looks perfect!
         const firebaseConfig = {apiKey: "AIzaSyA3Qw1oZInrhteTAd7iOK1D2bMHMVCG4EE",
-  authDomain: "tiny-tastes-tracker.firebaseapp.com",
-  projectId: "tiny-tastes-tracker",
-  storageBucket: "tiny-tastes-tracker.firebasestorage.app",
-  messagingSenderId: "87950543929",
-  appId: "1:87950543929:web:561607c04f73369f6411e8",
-  measurementId: "G-5K38CPMFS8"}; // <-- PASTE YOUR CONFIG OBJECT HERE
+            authDomain: "tiny-tastes-tracker.firebaseapp.com",
+            projectId: "tiny-tastes-tracker",
+            storageBucket: "tiny-tastes-tracker.firebasestorage.app",
+            messagingSenderId: "87950543929",
+            appId: "1:87950543929:web:561607c04f73369f6411e8",
+            measurementId: "G-5K38CPMFS8"};
 
         // =======================================================================
-        // === 2. PASTE YOUR PROJECT ID HERE ===
+        // === 2. YOUR PROJECT ID ===
         // =======================================================================
-        // Copy the 'projectId' value from the firebaseConfig object above.
-        //
-        // REPLACE THE LINE BELOW WITH YOUR PROJECT ID (as a string):
-        const appId = "tiny-tastes-tracker"; // <-- e.g., "tiny-tastes-tracker-123"
+        // This is your project ID. It also looks perfect!
+        const appId = "tiny-tastes-tracker"; 
 
         // =======================================================================
         
         const placeholderImgBase = "https-placehold-co-"; // Used in onerror
 
-        // (The rest of the app code is unchanged)
+        // *** EMOJIS RE-ADDED BELOW ***
         
         const allFoods = [
             {
@@ -872,7 +860,7 @@
                 b.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
             });
             btn.classList.add('bg-teal-600', 'text-white');
-            btn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            btn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-30all');
             renderFoodGrid();
         });
         exportCsvBtn.addEventListener('click', exportToCSV);
@@ -889,3 +877,4 @@
     </script>
 </body>
 </html>
+}
