@@ -746,7 +746,8 @@
         // === 3. YOUR AI API KEY (Leave "" for user-provided key) ===
         // =======================================================================
         const apiKey = ""; // Leave as-is, Canvas will inject.
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        // MODIFIED: Swapped to gemini-1.5-flash model to fix 403 errors
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
         
         // =======================================================================
 
@@ -1127,6 +1128,45 @@
                 toast.classList.remove('translate-x-0');
                 setTimeout(() => toast.classList.add('hidden'), 300);
             }, 3000);
+        }
+
+        // --- NEW: AI Fetch Wrapper with Exponential Backoff ---
+        async function fetchWithBackoff(url, options, maxRetries = 4) {
+            let delay = 1000; // 1 second
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    
+                    // Do not retry on client errors (4xx) like 403 (Forbidden)
+                    // We return the failing response immediately.
+                    if (response.status >= 400 && response.status < 500) {
+                        return response; // Return the error response immediately
+                    }
+                    
+                    // Only retry on server errors (5xx) or rate limits (429)
+                    if (response.status === 429 || (response.status >= 500 && response.status < 600)) {
+                        if (i === maxRetries - 1) {
+                            return response; // Last retry failed, return the error
+                        }
+                        // Do not log to console, as per instructions
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2; // Exponential backoff
+                    } else {
+                        // OK response (2xx) or other non-retryable error
+                        return response;
+                    }
+                    
+                } catch (error) {
+                    // Network errors, etc.
+                    if (i === maxRetries - 1) {
+                        throw error; // Last retry failed, throw the error
+                    }
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+            // This should be unreachable, but as a fallback:
+            throw new Error("API call failed after all retries.");
         }
 
         // --- Date Helpers ---
@@ -1683,14 +1723,14 @@
                     }
                 };
 
-                const response = await fetch(apiUrl, {
+                // MODIFIED: Using fetchWithBackoff
+                const response = await fetchWithBackoff(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) throw new Error("AI response not OK");
-                
+                if (!response.ok) throw new Error(`API response failed with status ${response.status}`);
                 const result = await response.json();
                 const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
                 const categories = JSON.parse(text);
@@ -1833,7 +1873,8 @@
                     }
                 };
 
-                const response = await fetch(apiUrl, {
+                // MODIFIED: Using fetchWithBackoff
+                const response = await fetchWithBackoff(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1879,7 +1920,8 @@
                     }
                 };
 
-                const response = await fetch(apiUrl, {
+                // MODIFIED: Using fetchWithBackoff
+                const response = await fetchWithBackoff(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
