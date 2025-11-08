@@ -30,7 +30,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- PDF Export Libraries (NO LONGER USED, but kept in case) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.autotable.umd.js"></script>
+    <!-- REMOVED jspdf-autotable.js SCRIPT TAG -->
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <!-- .ics file generator -->
@@ -746,8 +746,8 @@
         // === 3. YOUR AI API KEY (Leave "" for user-provided key) ===
         // =======================================================================
         const apiKey = ""; // Leave as-is, Canvas will inject.
-        // MODIFIED: Swapped to gemini-2.5-flash-preview-09-2025 to fix 404 retired model error
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        // MODIFIED: Swapped to gemini-1.5-flash-latest to fix 403 errors
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
         
         // =======================================================================
  
@@ -948,7 +948,7 @@
             { 
                 title: "Original '100 Foods' Chart", 
                 icon: "image",
-                content: `<p>Here is the original chart that inspired this tracker. Use it as a quick visual reference!</p><img src="https.storage.googleapis.com/aletheia-us-west1-prod-onboarding/blw-100-foods-chart.jpeg" alt="100 Foods for Baby Chart by The Fortified Family" class="w-full h-auto rounded-md shadow-md mt-4" onerror="this.onerror=null; this.src='https://placehold.co/600x800/eeeeee/999999?text=Could+not+load+image';">`
+                content: `<p>Here is the original chart that inspired this tracker. Use it as a quick visual reference!</p><img src="https" alt="100 Foods for Baby Chart" class="w-full h-auto rounded-md shadow-md mt-4" onerror="this.onerror=null; this.src='https://placehold.co/600x800/eeeeee/999999?text=100+Foods+Chart';">`
             },
             { 
                 title: "1. Key Signs of Readiness", 
