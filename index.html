@@ -746,11 +746,11 @@
         // === 3. YOUR AI API KEY (Leave "" for user-provided key) ===
         // =======================================================================
         const apiKey = ""; // Leave as-is, Canvas will inject.
-        // MODIFIED: Swapped to gemini-1.5-flash model to fix 403 errors
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        // MODIFIED: Swapped to gemini-2.5-flash-preview-09-2025 to fix 404 retired model error
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         
         // =======================================================================
-
+ 
         const placeholderImgBase = "https-placehold-co-";
         
         // *** EMOJIS FIXED ***
@@ -1722,14 +1722,14 @@
                         responseMimeType: "application/json",
                     }
                 };
-
-                // MODIFIED: Using fetchWithBackoff
+ 
+                // MODIFIED: Using fetchWithBackoff and new apiUrl
                 const response = await fetchWithBackoff(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
+ 
                 if (!response.ok) throw new Error(`API response failed with status ${response.status}`);
                 const result = await response.json();
                 const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -1872,14 +1872,14 @@
                         responseMimeType: "application/json",
                     }
                 };
-
-                // MODIFIED: Using fetchWithBackoff
+ 
+                // MODIFIED: Using fetchWithBackoff and new apiUrl
                 const response = await fetchWithBackoff(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
+ 
                 if (!response.ok) {
                     throw new Error(`API request failed with status ${response.status}`);
                 }
@@ -1919,14 +1919,14 @@
                         responseMimeType: "application/json",
                     }
                 };
-
-                // MODIFIED: Using fetchWithBackoff
+ 
+                // MODIFIED: Using fetchWithBackoff and new apiUrl
                 const response = await fetchWithBackoff(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
+ 
                 if (!response.ok) {
                     throw new Error(`API request failed with status ${response.status}`);
                 }
